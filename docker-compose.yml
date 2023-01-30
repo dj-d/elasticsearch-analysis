@@ -1,0 +1,11 @@
+# docker-compose up
+
+version: '3.9'
+
+services:
+  mongoDB:
+    image: 'bitnami/mongodb'
+    container_name: 'MongoDB_container'
+    ports:
+      - "27017:27017"
+
