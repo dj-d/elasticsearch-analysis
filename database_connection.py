@@ -19,9 +19,9 @@ except ConnectionFailure as e:
     print(e)
 
 with open("fileJSONProva.json") as file:
-    commit_json_collection = json.load(file)
+    revision_history = json.load(file)
 
-db = connect["Commit_DB"]
-commit_collection = db["commit_collection"]
-commit_collection.insert_many(commit_json_collection)
+db = connect["Revision_History_DB"]
+commit_collection = db["Revision_Collection"]
+commit_collection.insert_many(revision_history)
 
