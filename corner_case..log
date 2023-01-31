@@ -1,0 +1,175 @@
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/vector/DistanceFunctionBenchmark.java	0.6818054607138038
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/script/ScriptScoreBenchmark.java	0.5204232268863254
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/bytes/BytesArrayReadLongBenchmark.java	0.6491301357746124
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/bytes/PagedBytesReferenceReadLongBenchmark.java	0.6522740125656128
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/bytes/PagedBytesReferenceReadVIntBenchmark.java	0.5470130741596222
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/bytes/PagedBytesReferenceReadVLongBenchmark.java	0.5474220812320709
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/bytes/BytesArrayReadVLongBenchmark.java	0.5595602840185165
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/common/util/IntArrayBenchmark.java	0.4210319171349208
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/fs/AvailableIndexFoldersBenchmark.java	0.41345714032649994
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/routing/allocation/ShardsAvailabilityHealthIndicatorBenchmark.java	0.5032124409917742
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/routing/allocation/AllocationBenchmark.java	0.5251441486179829
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/routing/allocation/TestShardRoutingRoleStrategies.java	0.839453915754954
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/routing/allocation/Allocators.java	0.5412169595559438
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/index/mapper/BeatsMapperBenchmark.java	0.660754746860928
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/index/mapper/MapperServiceFactory.java	0.23499781638383865
+[INFO] RiTa.WordNet.version [033]
+file	readability
+@Setup
+    public void setUp() {
+        this.mapperService = MapperServiceFactory.create("""
+            {
+              "_doc": {
+                "dynamic": false,
+                "properties": {
+                  "host": {
+                    "type": "keyword",
+                    "store": true
+                  },
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "type": {
+                    "type": "keyword",
+                    "normalizer": "lowercase"
+                  },
+                  "uuid": {
+                    "type": "keyword",
+                    "doc_values": false
+                  },
+                  "version": {
+                    "type": "keyword"
+                  },
+                  "extra_field": {
+                    "type": "keyword"
+                  },
+                  "extra_field_text": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      }
+                    }
+                  },
+                  "nested_object": {
+                    "properties": {
+                      "keyword_nested": {
+                        "type": "keyword"
+                      },
+                      "text_nested": {
+                        "type": "text"
+                      },
+                      "number_nested": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+                       \s""");
+        this.sourceToParse = new SourceToParse(UUIDs.randomBase64UUID(), new BytesArray("""
+            {
+              "host": "some_value",
+              "name": "some_other_thing",
+              "type": "some_type_thing",
+              "uuid": "some_keyword_uuid",
+              "version": "some_version",
+              "extra_field_text": "bla bla text",
+              "nested_object" : {
+                "keyword_nested": "some random nested keyword",
+                "text_nested": "some random nested text",
+                "number_nested": 123234234
+              }
+            }"""), XContentType.JSON);
+    }
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/xcontent/FilterContentBenchmark.java	0.43559335358440876
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/time/DateFormatterFromBenchmark.java	0.9171019792556763
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/indices/common/RoundingBenchmark.java	0.4912902389963468
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/indices/breaker/MemoryStatsBenchmark.java	0.7082180455327034
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/search/aggregations/AggConstructionContentionBenchmark.java	0.7085059984099298
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/search/aggregations/TermsReduceBenchmark.java	0.4249137183651328
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/search/aggregations/bucket/terms/StringTermsSerializationBenchmark.java	0.3917108476161957
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/search/aggregations/bucket/terms/LongKeyedBucketOrdsBenchmark.java	0.6991373761133715
+[INFO] RiTa.WordNet.version [033]
+file	readability
+@Setup
+    public void setup() throws IOException {
+        // pre: set up MapperService and SearchExecutionContext
+        List<String> fields = new ArrayList<>();
+        for (int i = 0; i < NUMBER_OF_MAPPING_FIELDS; i++) {
+            fields.add(String.format("""
+                "field%d":{"type":"long"}""", i));
+        }
+        String mappings = """
+            {"_doc":{"properties":{""" + Strings.join(fields, ',') + "}}}";
+
+        mapperService = createMapperService(mappings);
+        IndexWriterConfig iwc = new IndexWriterConfig(IndexShard.buildIndexAnalyzer(mapperService));
+        directory = new ByteBuffersDirectory();
+        IndexWriter iw = new IndexWriter(directory, iwc);
+
+        for (int i = 0; i < 2000; i++) {
+            ParsedDocument doc = mapperService.documentMapper().parse(buildDoc(i));
+            iw.addDocument(doc.rootDoc());
+            if (i % 100 == 0) {
+                iw.commit();
+            }
+        }
+        iw.close();
+
+        indexReader = DirectoryReader.open(directory);
+    }
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/search/fetch/subphase/FetchSourcePhaseBenchmark.java	0.4844427172626768
+[INFO] RiTa.WordNet.version [033]
+file	readability
+/home/dj-d/Repositories/GitHub/elasticsearch/benchmarks/src/main/java/org/elasticsearch/benchmark/search/fetch/subphase/SourceFilteringBenchmark.java	0.6937228083610535
