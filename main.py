@@ -8,7 +8,7 @@ TOOL_PATH='/home/dj-d/University/Automated_Software_Delivery/Exam/readability'
 def get_hisoty(project_path: str) -> list:
     os.chdir(project_path)
 
-    cmd = f'git log --pretty=format:"%H|%an|%at"'
+    cmd = f'git log --reverse --pretty=format:"%H|%an|%at"'
 
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -18,10 +18,11 @@ def get_hisoty(project_path: str) -> list:
         print(f'_error: {_error.decode("utf-8")}')
 
         exit(1)
-
-    commit_list = _output.decode('utf-8').replace('"', '').split().reverse()
-
-    return commit_list.reverse()
+        
+    commit_list = [sub.replace('\n', '') for sub in _output.decode('utf-8').split('\"')]
+    no_empty = [x for x in commit_list if x != '']
+    
+    return no_empty
 
 def get_commit_files(commit: str) -> list:
     """
