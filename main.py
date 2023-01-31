@@ -5,6 +5,24 @@ import json
 PROJECT_PATH='/home/dj-d/Repositories/GitHub/elasticsearch/'
 TOOL_PATH='/home/dj-d/University/Automated_Software_Delivery/Exam/readability'
 
+def get_hisoty(project_path: str) -> list:
+    os.chdir(project_path)
+
+    cmd = f'git log --pretty=format:"%H|%an|%at"'
+
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    _output, _error = process.communicate()
+
+    if len(_error) > 0:
+        print(f'_error: {_error.decode("utf-8")}')
+
+        exit(1)
+
+    commit_list = _output.decode('utf-8').replace('"', '').split().reverse()
+
+    return commit_list.reverse()
+
 def get_commit_files(commit: str) -> list:
     """
     Get the files of a commit
@@ -95,16 +113,18 @@ def checkout(to: str) -> None:
     print(f'checkout_output: {_output.decode("utf-8")}')
 
 if __name__ == "__main__":
+    history = get_hisoty(project_path=PROJECT_PATH)
+
+    history_file = open('/home/dj-d/Repositories/GitHub/asd_exam/history.txt', 'w')
+    history_file.write('\n'.join(history))
+    history_file.close()
+
     data = list()
     
-    log_file = open('/home/dj-d/Repositories/GitHub/asd_exam/history.txt', 'r')
-    lines = log_file.readlines()
-    log_file.close()
-
     START_COMMIT = 0
     END_COMMIT = 100
 
-    for line in lines[START_COMMIT:END_COMMIT + 1]:
+    for line in history[START_COMMIT:END_COMMIT + 1]:
         line = line.strip().split('|')
         commit = line[0]
         author_name = line[1]
@@ -140,6 +160,5 @@ if __name__ == "__main__":
 
         data.append(main_body)
 
-    # print(json.dumps(data, indent=4))
     with open("/home/dj-d/Repositories/GitHub/asd_exam/iter1.json", "w") as write_file:
         json.dump(data, write_file, indent=4)
