@@ -24,8 +24,9 @@ git show --name-only --pretty="" <commit-id>
             {
                 "file_name": "",
                 "score": "",
+                "isReadable": true|false,
                 "error": "",
-                "isReadable": true|false
+                "code": ""
             }
         ]
     }
