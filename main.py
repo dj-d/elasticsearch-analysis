@@ -101,8 +101,8 @@ if __name__ == "__main__":
     lines = log_file.readlines()
     log_file.close()
 
-    START_COMMIT = 3
-    END_COMMIT = 13
+    START_COMMIT = 0
+    END_COMMIT = 100
 
     for line in lines[START_COMMIT:END_COMMIT + 1]:
         line = line.strip().split('|')
@@ -113,10 +113,10 @@ if __name__ == "__main__":
         print(f'Commit: {commit}')
         
         main_body = {
-            'commit': commit, 
+            'commit_id': commit, 
             'author_name': author_name,
             'timestamp': timestamp,
-            'unreadable_classes': list()
+            'revision_history': list()
             }
 
         files = get_commit_files(commit=commit)
