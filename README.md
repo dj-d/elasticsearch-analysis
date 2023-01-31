@@ -12,18 +12,20 @@ git show --name-only --pretty="" <commit-id>
 
 ### Steps
 
-- [ ] Create a new repository on GitHub
+- [x] Create a new repository on GitHub
 - [ ] Setup MongoDB
 - [ ] Populate MongoDB with data
   ```json
     {
         "commit_id": "",
         "author_name": "",
-        "author_date": "",
-        "unreadable_classes": [
+        "timestamp": "",
+        "revision_history": [
             {
                 "file_name": "",
-                "score": ""
+                "score": "",
+                "error": "",
+                "isReadable": true|false
             }
         ]
     }
