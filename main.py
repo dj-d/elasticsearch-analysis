@@ -44,7 +44,9 @@ def get_commit_files(commit: str) -> list:
         print(f'_error: {_error.decode("utf-8")}')
         exit(1)
 
-    return _output.decode('utf-8').split()[1:]
+    file_list = [x for x in _output.decode('utf-8').split()[1:] if x.endswith('.java')]
+
+    return file_list
 
 def get_score(file_path: str) -> dict:
     """
@@ -114,6 +116,8 @@ def checkout(to: str) -> None:
     print(f'checkout_output: {_output.decode("utf-8")}')
 
 if __name__ == "__main__":
+    checkout(to="main")
+
     history = get_hisoty(project_path=PROJECT_PATH)
 
     history_file = open('/home/dj-d/Repositories/GitHub/asd_exam/history.txt', 'w')
@@ -143,21 +147,22 @@ if __name__ == "__main__":
         files = get_commit_files(commit=commit)
 
         checkout(to=commit)
+        
+        if len(files) > 0:
+            for file in files:
+                print(f'File: {file}')
 
-        for file in files:
-            print(f'File: {file}')
+                rsm = get_score(file_path=file)
 
-            rsm = get_score(file_path=file)
+                print(f"Score['code']: {rsm['code']}, Score['score']: {rsm['score']}")
 
-            print(f"Score['code']: {rsm['code']}, Score['score']: {rsm['score']}")
-
-            main_body['unreadable_classes'].append({
-                    'file_name': file,
-                    'score': rsm['score'],
-                    'isReadable': True if rsm['score'] > 0.6 else False,
-                    'error': rsm['error'],
-                    'code': rsm['code']
-                })
+                main_body['revision_history'].append({
+                        'file_name': file,
+                        'score': rsm['score'],
+                        'isReadable': True if rsm['score'] > 0.6 else False,
+                        'error': rsm['error'],
+                        'code': rsm['code']
+                    })
 
         data.append(main_body)
 
