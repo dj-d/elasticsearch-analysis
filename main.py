@@ -2,10 +2,18 @@ import os
 import subprocess
 import json
 
-PROJECT_PATH='/home/dj-d/Repositories/GitHub/elasticsearch/'
-TOOL_PATH='/home/dj-d/University/Automated_Software_Delivery/Exam/readability'
+from constants import PROJECT_PATH, TOOL_PATH, START_COMMIT, END_COMMIT, FILES_LOCATION, OUTPUT_JSON_NAME
+
 
 def get_hisoty(project_path: str) -> list:
+    """
+    Get the revision history of the project from the first commit to the last
+
+    :param project_path: the path of the project
+
+    :return: the history of the project
+    """
+    
     os.chdir(project_path)
 
     cmd = f'git log --reverse --pretty=format:"%H|%an|%at"'
@@ -24,16 +32,17 @@ def get_hisoty(project_path: str) -> list:
     
     return no_empty
 
-def get_commit_files(commit: str) -> list:
+def get_commit_files(project_path: str, commit: str) -> list:
     """
-    Get the files of a commit
+    Get the changed files of a commit
 
+    :param project_path: the path of the project
     :param commit: the commit to be analyzed (hash)
 
     :return: the list of files of the commit
     """
 
-    os.chdir(PROJECT_PATH)
+    os.chdir(project_path)
     cmd = f'git show --name-only --pretty=format:\"\" {commit}'
 
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -48,11 +57,13 @@ def get_commit_files(commit: str) -> list:
 
     return file_list
 
-def get_score(file_path: str) -> dict:
+def get_score(project_path: str, file_path: str, tool_path: str) -> dict:
     """
-    Get the score of a file
+    Get the score of a file about readability
 
+    :param project_path: the path of the project
     :param file_path: path of the file to be analyzed
+    :param tool_path: path of the tool
 
     :return: the score of the file
     """
@@ -62,13 +73,13 @@ def get_score(file_path: str) -> dict:
         # exit(0)
         return {'error': 'File is not a java file', 'code': -2.0, 'score': -1.0}
     
-    if not os.path.isfile(PROJECT_PATH + file_path):
+    if not os.path.isfile(project_path + file_path):
         print('File does not exist')
         # exit(0)
         return {'error': 'File does not exist', 'code': -3.0, 'score': -1.0}
 
-    os.chdir(TOOL_PATH)
-    cmd = f'java -jar rsm.jar {PROJECT_PATH}{file_path}'
+    os.chdir(tool_path)
+    cmd = f'java -jar rsm.jar {project_path}{file_path}'
     process = subprocess.Popen(
         cmd.split(), 
         stdout=subprocess.PIPE, 
@@ -87,23 +98,19 @@ def get_score(file_path: str) -> dict:
     if score == 'NaN':
         score = -1.0
     
-    if len(score) <= 0:
-        print('Score error')
-        # exit(2)
-        return {'error': 'Score error', 'code': -5.0, 'score': -1.0}
-
     return {'error': '', 'code': 0.0, 'score': float(score)}
 
-def checkout(to: str) -> None:
+def checkout(project_path: str, to: str) -> None:
     """
     Checkout to a commit
 
+    :param project_path: the path of the project
     :param to: the commit to be checked out (hash)
 
     :return: None
     """
 
-    os.chdir(PROJECT_PATH)
+    os.chdir(project_path)
     cmd = f'git -c advice.detachedHead=false checkout {to}'
 
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -115,20 +122,39 @@ def checkout(to: str) -> None:
     
     print(f'checkout_output: {_output.decode("utf-8")}')
 
+def stash(project_path: str) -> None:
+    """
+    Stash the changes
+
+    :param project_path: the path of the project
+
+    :return: None
+    """
+
+    os.chdir(project_path)
+    os.system('git stash')
+
 if __name__ == "__main__":
-    checkout(to="main")
+    if START_COMMIT == 0 or not os.path.exists(f'{FILES_LOCATION}/history.txt'):
+        checkout(
+            project_path=PROJECT_PATH,
+            to="main"
+            )
 
-    history = get_hisoty(project_path=PROJECT_PATH)
+        history = get_hisoty(
+            project_path=PROJECT_PATH
+            )
 
-    history_file = open('/home/dj-d/Repositories/GitHub/asd_exam/history.txt', 'w')
-    history_file.write('\n'.join(history))
-    history_file.close()
+        history_file = open(f'{FILES_LOCATION}/history.txt', 'w')
+        history_file.write('\n'.join(history))
+        history_file.close()
+    else:
+        history_file = open(f'{FILES_LOCATION}/history.txt', 'r')
+        history = history_file.readlines()
+        history_file.close()
 
     data = list()
     
-    START_COMMIT = 0
-    END_COMMIT = 100
-
     for line in history[START_COMMIT:END_COMMIT + 1]:
         line = line.strip().split('|')
         commit = line[0]
@@ -144,15 +170,25 @@ if __name__ == "__main__":
             'revision_history': list()
             }
 
-        files = get_commit_files(commit=commit)
+        files = get_commit_files(
+            project_path=PROJECT_PATH,
+            commit=commit
+            )
 
-        checkout(to=commit)
+        checkout(
+            project_path=PROJECT_PATH,
+            to=commit
+            )
         
         if len(files) > 0:
             for file in files:
                 print(f'File: {file}')
 
-                rsm = get_score(file_path=file)
+                rsm = get_score(
+                    project_path=PROJECT_PATH,
+                    file_path=file,
+                    tool_path=TOOL_PATH
+                    )
 
                 print(f"Score['code']: {rsm['code']}, Score['score']: {rsm['score']}")
 
@@ -166,5 +202,5 @@ if __name__ == "__main__":
 
         data.append(main_body)
 
-    with open("/home/dj-d/Repositories/GitHub/asd_exam/iter1.json", "w") as write_file:
+    with open(f"{FILES_LOCATION}/{OUTPUT_JSON_NAME}", "w") as write_file:
         json.dump(data, write_file, indent=4)
