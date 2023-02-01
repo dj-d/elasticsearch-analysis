@@ -1,38 +1,46 @@
-```shell
-git log --pretty=format:"%H|%an|%at" > /home/dj-d/Repositories/GitHub/asd_exam/history.txt
+# ElasticSearch Analysis
+
+<!-- TODO: Added project description -->
+
+## How to use
+
+Create a virtual environment and install dependencies.
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-- ```%H``` - commit hash
-- ```%an``` - author name
-- ```%at``` - author time, UNIX timestamp
+Create a file named `.env` in the main folder of this project and add the following environment variables.
 
-```shell
-git show --name-only --pretty="" <commit-id>
+```env
+PROJECT_PATH=/main/path/of/the/project/to/analyze/
+TOOL_PATH=/main/path/of/the/tool/to/be/used/
+
+START_COMMIT=0 # Start commit index
+END_COMMIT=100 # End commit index
+
+FILES_LOCATION=/path/where/to/save/the/generated/files
+OUTPUT_JSON_NAME=file_name.json
 ```
 
-### Steps
+---
 
-- [x] Create a new repository on GitHub
-- [ ] Setup MongoDB
-- [ ] Populate MongoDB with data
-  ```json
-    {
-        "commit_id": "",
-        "author_name": "",
-        "timestamp": "",
-        "revision_history": [
-            {
-                "file_name": "",
-                "score": "",
-                "isReadable": true|false,
-                "error": "",
-                "code": ""
-            }
-        ]
-    }
-  ```
-- [x] Method to get the list of files in a commit
-- [x] Method to get the readability score of a file
+***Note**: i have no idea what to do on **winzoz** for environment variables, so "**Long live Linux**"*
+
+---
+
+Now you can run the script.
+
+```bash
+python main.py
+```
 
 ### References
 
