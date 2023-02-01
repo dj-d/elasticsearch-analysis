@@ -158,11 +158,11 @@ if __name__ == "__main__":
             project_path=PROJECT_PATH
             )
 
-        history_file = open(f'{FILES_LOCATION}/history.txt', 'w')
+        history_file = open(f'{FILES_LOCATION}/history.txt', 'w', encoding="utf-8")
         history_file.write('\n'.join(history))
         history_file.close()
     else:
-        history_file = open(f'{FILES_LOCATION}/history.txt', 'r')
+        history_file = open(f'{FILES_LOCATION}/history.txt', 'r', encoding="utf-8")
         history = history_file.readlines()
         history_file.close()
 
