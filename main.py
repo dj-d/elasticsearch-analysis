@@ -5,9 +5,10 @@ import json
 from constants import PROJECT_PATH, TOOL_PATH, START_COMMIT, END_COMMIT, FILES_LOCATION, OUTPUT_JSON_NAME
 
 
-def get_hisoty(project_path: str) -> list:
+def get_history(project_path: str) -> list:
     """
     Get the revision history of the project from the first commit to the last
+    Output format: commit_hash|author_name|timestamp
 
     :param project_path: the path of the project
 
@@ -153,7 +154,7 @@ if __name__ == "__main__":
             to="main"
             )
 
-        history = get_hisoty(
+        history = get_history(
             project_path=PROJECT_PATH
             )
 
