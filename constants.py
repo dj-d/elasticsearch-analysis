@@ -1,5 +1,5 @@
 PROJECT_PATH='/home/dj-d/Repositories/GitHub/elasticsearch/'
-TOOL_PATH='/home/dj-d/University/Automated_Software_Delivery/Exam/readability'
+TOOL_PATH='./readability_tool'
 
 START_COMMIT = 101
 END_COMMIT = 300
