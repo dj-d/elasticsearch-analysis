@@ -135,13 +135,17 @@ def stash(project_path: str) -> None:
     os.system('git stash')
 
 if __name__ == "__main__":
-    if not os.path.exists(PROJECT_PATH):
+    if not os.path.exists(PROJECT_PATH) or PROJECT_PATH is None:
         print('Project path does not exist')
         exit(1)
     
-    if not os.path.exists(TOOL_PATH):
+    if not os.path.exists(TOOL_PATH) or TOOL_PATH is None:
         print('Tool path does not exist')
         exit(2)
+    
+    if FILES_LOCATION is None:
+        print('Files location does not exist')
+        exit(3)
 
     if START_COMMIT == 0 or not os.path.exists(f'{FILES_LOCATION}/history.txt'):
         checkout(
@@ -169,7 +173,7 @@ if __name__ == "__main__":
         author_name = line[1]
         timestamp = line[2]
 
-        print(f'Commit: {commit}')
+        print(f'\nCommit: {commit}')
         
         main_body = {
             'commit_id': commit, 
