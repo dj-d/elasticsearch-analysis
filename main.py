@@ -135,6 +135,14 @@ def stash(project_path: str) -> None:
     os.system('git stash')
 
 if __name__ == "__main__":
+    if not os.path.exists(PROJECT_PATH):
+        print('Project path does not exist')
+        exit(1)
+    
+    if not os.path.exists(TOOL_PATH):
+        print('Tool path does not exist')
+        exit(2)
+
     if START_COMMIT == 0 or not os.path.exists(f'{FILES_LOCATION}/history.txt'):
         checkout(
             project_path=PROJECT_PATH,
