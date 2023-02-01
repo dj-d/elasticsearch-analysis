@@ -1,5 +1,14 @@
+# Python
 __pycache__/
+venv/
 
+# Env
+.env
+
+# Files
 *.txt
 *.log
 *.json
+
+# Excluded files
+!requirements.txt
