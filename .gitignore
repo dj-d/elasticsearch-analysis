@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 venv/
+*.pyc
 
 # Env
 .env
@@ -9,6 +10,10 @@ venv/
 *.txt
 *.log
 *.json
+*.swp
 
 # Excluded files
 !requirements.txt
+
+# PyCharm
+.idea/
