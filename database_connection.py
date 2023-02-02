@@ -78,19 +78,24 @@ def find_file_NotReadable_occurence(file_name):
             # print("Commit: " + file_occurence['commit_id'] + "  ||  Timestamp: " + file_occurence['timestamp'] + "  ||  isReadable: " + file_occurence['isReadable'])
 
 
+def get_all_commit_in_DB():
+    cursor = collection.find({},{"commit_id": 1})
+    e = 1
+    for i in cursor:
+        print(str(e) + " -> " + i["commit_id"])
+        e = e + 1
 
 '''
 Funzione per stampare i valori delle query
 - Stampe in base al caso
 S: Standard - Solo print
 '''
-
-
 def print_cursor(cursor, print_type):
     if (print_type == "S"):
         print(cursor)
     else:
         print("Print Error")
 
-find_only_unreadable_file_byCommitID("bd2b0a632bfc5aabb408e7f47cfaa52a7d1b2b50")
+#find_only_unreadable_file_byCommitID("bd2b0a632bfc5aabb408e7f47cfaa52a7d1b2b50")
 #find_file_NotReadable_occurence("modules/elasticsearch/src/main/java/org/elasticsearch/action/bulk/TransportShardBulkAction.java")
+#get_all_commit_in_DB()
