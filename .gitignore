@@ -1,2 +1,11 @@
 #PySharm
 .idea
+
+#env
+.env
+
+#Pyhton
+venv/
+__pychache__/
+
+!constants.pyc
