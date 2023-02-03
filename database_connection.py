@@ -146,15 +146,14 @@ def get_all_file_timestamps_and_readable(file_name):
                              {"timestamp": 1, "_id": 0, "revision_history.isReadable.$": 1}
     )
     i = 1
-
     #dizionario
     file_Timestemps_Readability_dictionary = {}
     for file_occurrence in cursor:
-
         #Get Readable and Timestamp value
         file_commit_isReadable = str(file_occurrence["revision_history"][0]['isReadable'])
         file_commit_timestamp = str(file_occurrence["timestamp"])
         file_Timestemps_Readability_dictionary[file_commit_timestamp]=file_commit_isReadable
+
         print(str(i) + " -> " + str(file_occurrence))
         i = i + 1
     #print dizionario
