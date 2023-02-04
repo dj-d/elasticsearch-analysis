@@ -1,6 +1,7 @@
 #PySharm
 .idea
-
+.idea/asd_exam_tests.iml
+.idea/misc.xml
 #env
 .env
 

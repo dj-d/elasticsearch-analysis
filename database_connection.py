@@ -154,10 +154,12 @@ def get_all_file_timestamps_and_readable(file_name):
         file_commit_timestamp = str(file_occurrence["timestamp"])
         file_Timestemps_Readability_dictionary[file_commit_timestamp]=file_commit_isReadable
 
-        print(str(i) + " -> " + str(file_occurrence))
-        i = i + 1
+        #print(str(i) + " -> " + str(file_occurrence))
+        #i = i + 1
     #print dizionario
-    #print(cambiaNome)
+
+    for value in file_Timestemps_Readability_dictionary:
+        print(value + " : " + file_Timestemps_Readability_dictionary[value])
     return file_Timestemps_Readability_dictionary
 
 
@@ -165,8 +167,11 @@ def get_all_file_timestamps_and_readable(file_name):
 def get_most_unreadable():
     all_file_set = get_all_file()
     for file in all_file_set:
-        get_all_file_timestamps(str(file))
-        print("# - - - New File Timestamps - - - ")
+        print("# - - File Name: " + str(file))
+        get_all_file_timestamps_and_readable(str(file))
+        print("\n")
+
+
 
 
 '''
@@ -189,8 +194,12 @@ def print_cursor(cursor, print_type):
 # get_all_file()
 # get_all_file_timestamps("modules/benchmark/micro/src/main/java/org/elasticsearch/benchmark/index/engine/SimpleEngineBenchmark.java")
 A = "modules/elasticsearch/src/main/java/org/elasticsearch/index/merge/policy/LogByteSizeMergePolicyProvider.java"
-get_all_file_timestamps_and_readable(A)
+#get_all_file_timestamps_and_readable(A)
 #find_file_NotReadable_occurrence(A)
 
 #
-#get_most_unreadable()
+get_most_unreadable()
+
+#TODO:
+# - Capire se i timestamps sono ordinati
+# - Capire come mettere insieme file_name e valori del dizionario
