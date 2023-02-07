@@ -73,8 +73,9 @@ def find_file_NotReadable_occurrence(file_name):
 
     i = 1
     for file_occurence in cursor:
-        print(str(i) + " ->" + "File not Readable in Commit: " + file_occurence['commit_id'] + "  ||  Timestamp: " + file_occurence['timestamp'])
-        i =i+1
+        print(str(i) + " ->" + "File not Readable in Commit: " + file_occurence['commit_id'] + "  ||  Timestamp: " +
+              file_occurence['timestamp'])
+        i = i + 1
 
     # if((len(list(cursor))) == 0):
     #    print("The file [" + file_name + "] is always readable")
@@ -116,7 +117,46 @@ def get_all_file():
     for file in unique_file_names:
         print(file)
 
+    print("Total Files: " + str(len(unique_file_names)))
+
     return unique_file_names
+
+
+'''
+La funzione ritrona la lista di tutti i file che risultano unreadable
+'''
+
+
+def get_all_unreadable_file():
+    # cursor = collection.find_one({"revision_history.isReadable": False}, {"revision_history.file_name": 1, "_id": 0})
+    cursor = collection.aggregate([
+        {'$unwind': '$revision_history'},
+        {'$match': {'revision_history.isReadable': False}}
+    ])
+
+    # Set per inserire i nomi di file unici
+    # Set non può contenere duplicati
+    unique_unreadable_file_names = set()
+
+    z = 1
+    for noteReadable_file in cursor:
+        # print(str(z) + ":" + str(noteReadable_file['revision_history']['file_name']) + "\n")
+        unique_unreadable_file_names.add(noteReadable_file['revision_history']['file_name'])
+
+    for index, file in enumerate(unique_unreadable_file_names):
+        print(str(file) + "\n")
+
+    print(len(unique_unreadable_file_names))
+
+    # for commit_files in cursor:
+    #     for file in commit_files['revision_history']:
+    #         unique_unreadable_file_names.add(file['file_name'])
+
+    # stampa la lista dei file
+    # for file in unique_unreadable_file_names:
+    #     print(file)
+
+    return unique_unreadable_file_names
 
 
 '''
@@ -133,7 +173,6 @@ def get_all_file_timestamps(file_name):
         i = i + 1
 
 
-
 '''
 .$ elemento di proiezione
 La funzione preso in input un file, ritorna i timestamp delle commit in cui è presente e se risuta readable o no.
@@ -141,37 +180,87 @@ La funzione preso in input un file, ritorna i timestamp delle commit in cui è p
 :return dizionario key:value  commit_timestamp : isReadable_value
 '''
 
-def get_all_file_timestamps_and_readable(file_name):
+
+def get_file_timestamps_and_readable(file_name):
     cursor = collection.find({"revision_history.file_name": file_name},
                              {"timestamp": 1, "_id": 0, "revision_history.isReadable.$": 1}
-    )
+                             )
     i = 1
-    #dizionario
+    # dizionario
     file_Timestemps_Readability_dictionary = {}
     for file_occurrence in cursor:
-        #Get Readable and Timestamp value
+        # Get Readable and Timestamp value
         file_commit_isReadable = str(file_occurrence["revision_history"][0]['isReadable'])
         file_commit_timestamp = str(file_occurrence["timestamp"])
-        file_Timestemps_Readability_dictionary[file_commit_timestamp]=file_commit_isReadable
+        file_Timestemps_Readability_dictionary[file_commit_timestamp] = file_commit_isReadable
 
-        #print(str(i) + " -> " + str(file_occurrence))
-        #i = i + 1
-    #print dizionario
-
+        # print(str(i) + " -> " + str(file_occurrence))
+        # i = i + 1
+    # print dizionario
     for value in file_Timestemps_Readability_dictionary:
         print(value + " : " + file_Timestemps_Readability_dictionary[value])
+
     return file_Timestemps_Readability_dictionary
 
 
+'''
+La funzione ritorna un dizionario cone le informazioni da analizzare
+'''
+
+
+def data_file_dict(name_file, timestamps_file, readabilities_file):
+    data_files_dict = {}
+    data_files_dict['name_file'] = name_file
+    data_files_dict['timestamps_file'] = timestamps_file
+    data_files_dict['readabilities_file'] = readabilities_file
+    if len(data_files_dict['timestamps_file']) != len(data_files_dict['readabilities_file']):
+        print("Error in dict array lenght - Function: data_file_dict")
+        raise
+    else:
+        return data_files_dict
+
 
 def get_most_unreadable():
-    all_file_set = get_all_file()
-    for file in all_file_set:
+    # creo il dizionario
+
+    data_file_list = []
+    # prende solo i file illegibili nel DB
+    all_unreadable_file_set = get_all_unreadable_file()
+
+    # print(all_unreadable_file_set)
+    for file in all_unreadable_file_set:
         print("# - - File Name: " + str(file))
-        get_all_file_timestamps_and_readable(str(file))
-        print("\n")
 
+        # otteniamo i valori del file analizzato
+        get_file_timestamps_and_readable(str(file))
 
+        # popolare la lista con i dizionari
+        data_file_list.append(data_file_dict(name_file=str(file),
+                                             timestamps_file=[1, 2, 3],
+                                             readabilities_file=[True, False, True]))
+
+        # print("\n")
+
+    sample = 'ciao'
+    for er in data_file_list:
+        if (sample == er['name_file']):
+            print("OK")
+            er['timestamps_file'].append("Funziono")
+            er['readabilities_file'].append("Funziono_2")
+        else:
+            data_file_list.append(
+                data_file_dict(
+                    name_file=str(str),
+                    timestamps_file=[3, 3, 3, 3, 3],
+                    readabilities_file=[True, False, True, 3, 3]
+                )
+            )
+
+    j = 0
+    for index in data_file_list:
+        print(data_file_list[j])
+        print(index['timestamps_file'])
+        j = j + 1
 
 
 '''
@@ -194,12 +283,12 @@ def print_cursor(cursor, print_type):
 # get_all_file()
 # get_all_file_timestamps("modules/benchmark/micro/src/main/java/org/elasticsearch/benchmark/index/engine/SimpleEngineBenchmark.java")
 A = "modules/elasticsearch/src/main/java/org/elasticsearch/index/merge/policy/LogByteSizeMergePolicyProvider.java"
-#get_all_file_timestamps_and_readable(A)
-#find_file_NotReadable_occurrence(A)
-
-#
+# get_all_file_timestamps_and_readable(A)
+# find_file_NotReadable_occurrence(A)
+# get_all_unreadable_file()
 get_most_unreadable()
+# get_all_file()
 
-#TODO:
+# TODO:
 # - Capire se i timestamps sono ordinati
 # - Capire come mettere insieme file_name e valori del dizionario
