@@ -197,8 +197,8 @@ def get_file_timestamps_and_readable(file_name):
         # print(str(i) + " -> " + str(file_occurrence))
         # i = i + 1
     # print dizionario
-    for value in file_Timestemps_Readability_dictionary:
-        print(value + " : " + file_Timestemps_Readability_dictionary[value])
+    # for value in file_Timestemps_Readability_dictionary:
+    #     print(value + " : " + file_Timestemps_Readability_dictionary[value])
 
     return file_Timestemps_Readability_dictionary
 
@@ -229,37 +229,21 @@ def get_most_unreadable():
 
     # print(all_unreadable_file_set)
     for file in all_unreadable_file_set:
-        print("# - - File Name: " + str(file))
+        # print("# - - File Name: " + str(file))
 
         # otteniamo i valori del file analizzato
-        get_file_timestamps_and_readable(str(file))
-
+        file_details = get_file_timestamps_and_readable(str(file))
         # popolare la lista con i dizionari
         data_file_list.append(data_file_dict(name_file=str(file),
-                                             timestamps_file=[1, 2, 3],
-                                             readabilities_file=[True, False, True]))
-
-        # print("\n")
-
-    sample = 'ciao'
-    for er in data_file_list:
-        if (sample == er['name_file']):
-            print("OK")
-            er['timestamps_file'].append("Funziono")
-            er['readabilities_file'].append("Funziono_2")
-        else:
-            data_file_list.append(
-                data_file_dict(
-                    name_file=str(str),
-                    timestamps_file=[3, 3, 3, 3, 3],
-                    readabilities_file=[True, False, True, 3, 3]
-                )
-            )
+                                             timestamps_file=list(file_details.keys()),
+                                             readabilities_file=list(file_details.values())
+                                             )
+                              )
 
     j = 0
     for index in data_file_list:
         print(data_file_list[j])
-        print(index['timestamps_file'])
+        #print(index['timestamps_file'])
         j = j + 1
 
 
