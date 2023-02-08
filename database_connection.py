@@ -238,7 +238,7 @@ def get_Commit_Author(commit_id):
 def get_most_unreadable_author():
     """
     :param
-    :return:
+    :return la funzione assegna agli autori che introducono file illegibili un intero che rappresenta il numero di file non leggibili introdotti in tutto il progetto
     """
     for i in data_file_list:
         for index, in_commit_file_readability in enumerate(i['readabilities_file']):
