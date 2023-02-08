@@ -12,6 +12,9 @@ from pymongo.errors import ConnectionFailure
 # Perché ho la 104 ed ho appena perso 10 minuti a capire perché nel DB ci fossero tante occorrenze con lo stesso commi_id -> perché ogni volta che avviavo lo script questo insieriva i duplicati
 Populate_DB = False
 
+# creo il dizionario globale
+data_file_list = []
+
 try:
     localhost = "127.0.0.1"
     port = 27017
@@ -170,22 +173,14 @@ def get_file_timestamps_and_readable(file_name):
     cursor = collection.find({"revision_history.file_name": file_name},
                              {"timestamp": 1, "_id": 0, "revision_history.isReadable.$": 1}
                              )
-    i = 1
-    # dizionario
-    file_Timestemps_Readability_dictionary = {}
+    readability = list()
+    timestamp = list()
+
     for file_occurrence in cursor:
-        # Get Readable and Timestamp value
-        file_commit_isReadable = str(file_occurrence["revision_history"][0]['isReadable'])
-        file_commit_timestamp = str(file_occurrence["timestamp"])
-        file_Timestemps_Readability_dictionary[file_commit_timestamp] = file_commit_isReadable
+        readability.append(str(file_occurrence["revision_history"][0]['isReadable']))
+        timestamp.append(str(file_occurrence["timestamp"]))
 
-        # print(str(i) + " -> " + str(file_occurrence))
-        # i = i + 1
-    # print dizionario
-    # for value in file_Timestemps_Readability_dictionary:
-    #     print(value + " : " + file_Timestemps_Readability_dictionary[value])
-
-    return file_Timestemps_Readability_dictionary
+    return {"timestamp": timestamp, "readability": readability}
 
 
 def data_file_dict(name_file, timestamps_file, readabilities_file):
@@ -208,24 +203,31 @@ def data_file_dict(name_file, timestamps_file, readabilities_file):
 
 
 def get_most_unreadable():
-    # creo il dizionario
-    data_file_list = []
     # prende solo i file illegibili nel DB
     all_unreadable_file_set = get_all_unreadable_file()
 
     for file in all_unreadable_file_set:
-        # print("# - - File Name: " + str(file))
         # otteniamo i valori del file analizzato
         file_details = get_file_timestamps_and_readable(str(file))
+        get_file_timestamps_and_readable(str(file))
         # popolare la lista con i dizionari
-        data_file_list.append(data_file_dict(name_file=str(file),
-                                             timestamps_file=list(file_details.keys()),
-                                             readabilities_file=list(file_details.values())
-                                             )
-                              )
-    # print all
-    for index in data_file_list:
-        print(index)
+        data_file_list.append(
+            {
+                "name_file": str(file),
+                "timestamps_file": file_details['timestamp'],
+                "readabilities_file": file_details['readability']
+            }
+        )
+
+
+def get_Commit_Author(commit_id):
+    """
+
+    :return:
+    """
+    cursor = collection.find_one({"commit_id": str(commit_id)}, {"_id": 0, "author_name": 1})
+
+    print(cursor)
 
 
 # find_only_unreadable_file_byCommitID("bd2b0a632bfc5aabb408e7f47cfaa52a7d1b2b50")
@@ -239,3 +241,10 @@ def get_most_unreadable():
 # get_all_unreadable_file()
 get_most_unreadable()
 # get_all_file()
+
+
+# print all
+for index in data_file_list:
+    print(index)
+
+get_Commit_Author("1265635806")
