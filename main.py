@@ -203,12 +203,23 @@ if __name__ == "__main__":
                     tool_path=TOOL_PATH
                     )
 
-                print(f"Score['code']: {rsm['code']}, Score['score']: {rsm['score']}")
+                print(f"Code: {rsm['code']}, Score: {rsm['score']}")
+
+                if rsm['score'] >= 0 and rsm['score'] < 0.4:
+                    is_readable = False
+                    is_unsure = False
+                elif rsm['score'] > 0.6 and rsm['score'] <= 1:
+                    is_readable = True
+                    is_unsure = False
+                else:
+                    is_readable = False
+                    is_unsure = True
 
                 main_body['revision_history'].append({
                         'file_name': file,
                         'score': rsm['score'],
-                        'isReadable': True if rsm['score'] > 0.6 else False,
+                        'isReadable': is_readable,
+                        'isUnsure': is_unsure,
                         'error': rsm['error'],
                         'code': rsm['code']
                     })
