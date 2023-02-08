@@ -131,7 +131,7 @@ def get_all_unreadable_file():
     # cursor = collection.find_one({"revision_history.isReadable": False}, {"revision_history.file_name": 1, "_id": 0})
     cursor = collection.aggregate([
         {'$unwind': '$revision_history'},
-        {'$match': {'revision_history.isReadable': False}}
+        {'$match': {'revision_history.score': {"$gte": 0, "$lt": 0.4}}}
     ])
 
     # Set per inserire i nomi di file unici
@@ -147,15 +147,6 @@ def get_all_unreadable_file():
         print(str(file) + "\n")
 
     print(len(unique_unreadable_file_names))
-
-    # for commit_files in cursor:
-    #     for file in commit_files['revision_history']:
-    #         unique_unreadable_file_names.add(file['file_name'])
-
-    # stampa la lista dei file
-    # for file in unique_unreadable_file_names:
-    #     print(file)
-
     return unique_unreadable_file_names
 
 
@@ -222,15 +213,12 @@ def data_file_dict(name_file, timestamps_file, readabilities_file):
 
 def get_most_unreadable():
     # creo il dizionario
-
     data_file_list = []
     # prende solo i file illegibili nel DB
     all_unreadable_file_set = get_all_unreadable_file()
 
-    # print(all_unreadable_file_set)
     for file in all_unreadable_file_set:
         # print("# - - File Name: " + str(file))
-
         # otteniamo i valori del file analizzato
         file_details = get_file_timestamps_and_readable(str(file))
         # popolare la lista con i dizionari
@@ -239,12 +227,9 @@ def get_most_unreadable():
                                              readabilities_file=list(file_details.values())
                                              )
                               )
-
-    j = 0
+    #print all
     for index in data_file_list:
-        print(data_file_list[j])
-        #print(index['timestamps_file'])
-        j = j + 1
+        print(index)
 
 
 '''
@@ -269,7 +254,7 @@ def print_cursor(cursor, print_type):
 A = "modules/elasticsearch/src/main/java/org/elasticsearch/index/merge/policy/LogByteSizeMergePolicyProvider.java"
 # get_all_file_timestamps_and_readable(A)
 # find_file_NotReadable_occurrence(A)
-# get_all_unreadable_file()
+#get_all_unreadable_file()
 get_most_unreadable()
 # get_all_file()
 
