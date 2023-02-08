@@ -26,7 +26,8 @@ except ConnectionFailure as e:
     print(e)
 
 # Path alla directory dei file
-results_directory = "Results"
+# results_directory = "Results"
+results_directory = "Results_Test"
 
 db = client["Revision_History_DB"]
 # reference al database
@@ -87,12 +88,23 @@ def get_all_commit_in_DB():
     :return: la lista degli id dei commit presenti nel Database
     """
     cursor = collection.find({}, {"commit_id": 1})
-    index = 1
+
     for i in cursor:
-        print(str(index) + " -> " + i["commit_id"])
-        index = index + 1
+        print(i["commit_id"])
 
     return list(cursor)
+
+
+def get_all_timestamps_in_DB():
+    cursor = collection.find({},
+                             {"timestamp": 1, "_id": 0}
+                             )
+
+    # for index, item in enumerate(cursor):
+    #   print(str(index) +" " + item['timestamp'])
+
+    for item in cursor:
+        print(item['timestamp'])
 
 
 def get_all_file():
@@ -171,35 +183,18 @@ def get_file_timestamps_and_readable(file_name):
     :return dizionario key:value  commit_timestamp : isReadable_value
     """
     cursor = collection.find({"revision_history.file_name": file_name},
-                             {"timestamp": 1, "_id": 0, "revision_history.isReadable.$": 1}
+                             {"timestamp": 1, "commit_id": 1, "_id": 0, "revision_history.isReadable.$": 1}
                              )
     readability = list()
     timestamp = list()
+    commit_id = list()
 
     for file_occurrence in cursor:
         readability.append(str(file_occurrence["revision_history"][0]['isReadable']))
         timestamp.append(str(file_occurrence["timestamp"]))
+        commit_id.append(str(file_occurrence["commit_id"]))
 
-    return {"timestamp": timestamp, "readability": readability}
-
-
-def data_file_dict(name_file, timestamps_file, readabilities_file):
-    """
-    La funzione ritorna un dizionario cone le informazioni da analizzare
-    :param
-
-    :return
-    """
-
-    data_files_dict = {}
-    data_files_dict['name_file'] = name_file
-    data_files_dict['timestamps_file'] = timestamps_file
-    data_files_dict['readabilities_file'] = readabilities_file
-    if len(data_files_dict['timestamps_file']) != len(data_files_dict['readabilities_file']):
-        print("Error in dict array lenght - Function: data_file_dict")
-        raise
-    else:
-        return data_files_dict
+    return {"timestamp": timestamp, "readability": readability, "commit_id": commit_id}
 
 
 def get_most_unreadable():
@@ -209,15 +204,24 @@ def get_most_unreadable():
     for file in all_unreadable_file_set:
         # otteniamo i valori del file analizzato
         file_details = get_file_timestamps_and_readable(str(file))
-        get_file_timestamps_and_readable(str(file))
+
         # popolare la lista con i dizionari
         data_file_list.append(
             {
                 "name_file": str(file),
                 "timestamps_file": file_details['timestamp'],
-                "readabilities_file": file_details['readability']
+                "readabilities_file": file_details['readability'],
+                "commit_id_file": file_details['commit_id']
             }
         )
+        # check on file_details length
+        if (len(file_details['timestamp']) != len(file_details['readability']) or (
+                len(file_details['readability']) != (len(file_details['commit_id'])))):
+            print("Error in dict array lenght - Function: data_file_dict")
+            raise
+
+    for index in data_file_list:
+        print(index)
 
 
 def get_Commit_Author(commit_id):
@@ -226,8 +230,6 @@ def get_Commit_Author(commit_id):
     :return:
     """
     cursor = collection.find_one({"commit_id": str(commit_id)}, {"_id": 0, "author_name": 1})
-
-    print(cursor)
 
 
 # find_only_unreadable_file_byCommitID("bd2b0a632bfc5aabb408e7f47cfaa52a7d1b2b50")
@@ -241,10 +243,8 @@ def get_Commit_Author(commit_id):
 # get_all_unreadable_file()
 get_most_unreadable()
 # get_all_file()
-
-
+# get_all_timestamps_in_DB()
+# get_all_commit_in_DB()
 # print all
-for index in data_file_list:
-    print(index)
 
-get_Commit_Author("1265635806")
+# get_Commit_Author("1265635806")
