@@ -226,10 +226,36 @@ def get_most_unreadable():
 
 def get_Commit_Author(commit_id):
     """
-
-    :return:
+    :param  l'ID di una commit
+    :return il nome dell'autore della commit
     """
     cursor = collection.find_one({"commit_id": str(commit_id)}, {"_id": 0, "author_name": 1})
+
+    # print(cursor['author_name'])
+    return cursor['author_name']
+
+
+def get_most_unreadable_author():
+    """
+    :param
+    :return:
+    """
+    for i in data_file_list:
+        for index, in_commit_file_readability in enumerate(i['readabilities_file']):
+
+            print("value: " + in_commit_file_readability)
+            if(in_commit_file_readability == str(False)):
+                print("False -> " + str(index))
+                print("---")
+                #TODO: Se è false devo prendere il commit giusto?
+
+
+
+
+            #print(i['timestamps_file'][index])
+        print("\n")
+        break
+
 
 
 # find_only_unreadable_file_byCommitID("bd2b0a632bfc5aabb408e7f47cfaa52a7d1b2b50")
@@ -246,5 +272,5 @@ get_most_unreadable()
 # get_all_timestamps_in_DB()
 # get_all_commit_in_DB()
 # print all
-
-# get_Commit_Author("1265635806")
+get_Commit_Author("10f0eaad68557ff2aae92dd65e8f1b9037ea0942")
+get_most_unreadable_author()
