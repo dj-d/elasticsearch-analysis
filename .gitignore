@@ -1,12 +1,12 @@
 #PySharm
-.idea
-.idea/asd_exam_tests.iml
-.idea/misc.xml
+.idea/
+
 #env
 .env
 
 #Pyhton
 venv/
+
 __pychache__/
 
 !constants.pyc
