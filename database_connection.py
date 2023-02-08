@@ -40,17 +40,13 @@ if (Populate_DB):
             iters_json = json.load(json_file)
             collection.insert_many(iters_json)
 
-# Questa query ritorna solamente il nome di tutti i file che sono non leggibili della prima commit
-# cursor = collection.find_one({"revision_history": {"$elemMatch": {"isReadable": False}}}, {"revision_history.file_name": 1})
-
-
-'''
-Funzione che ritorna tutti i file unredable di un determianto commit
-- La query ritorna solamente il nome del file
-'''
-
 
 def find_only_unreadable_file_byCommitID(commit_id):
+    """
+    :param  l'id di una commit
+    :return tutti i file unredable di un determianto commit, la query ritorna solamente il nome del file
+    """
+
     cursor = collection.find_one({"revision_history":
                                       {"$elemMatch": {"isReadable": False}},
                                   "commit_id": commit_id},
@@ -60,12 +56,10 @@ def find_only_unreadable_file_byCommitID(commit_id):
         print(i)
 
 
-'''
-La Funzione restituisce gli Id delle commit ed il timestamp di tutte le occorrenze del file in cui risulta unredable 
-'''
-
-
 def find_file_NotReadable_occurrence(file_name):
+    """
+    :return Id delle commit ed il timestamp di tutte le occorrenze del file in cui risulta unredable
+    """
     cursor = collection.find({"revision_history":
                                   {"$elemMatch": {"$and": [{"file_name": file_name}, {"isReadable": False}]}},
                               "revision_history.file_name": file_name},
@@ -86,23 +80,26 @@ def find_file_NotReadable_occurrence(file_name):
 
 
 def get_all_commit_in_DB():
+    """
+    :return: la lista degli id dei commit presenti nel Database
+    """
     cursor = collection.find({}, {"commit_id": 1})
-    e = 1
+    index = 1
     for i in cursor:
-        print(str(e) + " -> " + i["commit_id"])
-        e = e + 1
+        print(str(index) + " -> " + i["commit_id"])
+        index = index + 1
 
-
-'''
-La funzione restituisce tutti i file presenti nel database
-Per farlo utilizza la struttura set() che non può contenere duplicati
-dunque ogni file occorre una sola volta
-
-:return  Lista di tutti i file presenti nel DB 
-'''
+    return list(cursor)
 
 
 def get_all_file():
+    """
+    La funzione restituisce tutti i file presenti nel database
+    Per farlo utilizza la struttura set() che non può contenere duplicati
+    dunque ogni file occorre una sola volta
+
+    :return  Lista di tutti i file presenti nel DB
+    """
     cursor = collection.find({}, {"revision_history.file_name": 1, "_id": 0})
 
     # Set per inserire i nomi di file unici
@@ -122,13 +119,11 @@ def get_all_file():
     return unique_file_names
 
 
-'''
-La funzione ritrona la lista di tutti i file che risultano unreadable
-'''
-
-
 def get_all_unreadable_file():
-    # cursor = collection.find_one({"revision_history.isReadable": False}, {"revision_history.file_name": 1, "_id": 0})
+    '''
+    :return la lista di tutti i file che risultano unreadable quindi i file nel DB che hanno almeno uno score inferiore a 0.4 in una commit
+    '''
+
     cursor = collection.aggregate([
         {'$unwind': '$revision_history'},
         {'$match': {'revision_history.score': {"$gte": 0, "$lt": 0.4}}}
@@ -150,12 +145,11 @@ def get_all_unreadable_file():
     return unique_unreadable_file_names
 
 
-'''
-La funzione restituisce la lista dei timestamp dato un file in input
-'''
-
-
-def get_all_file_timestamps(file_name):
+def get_file_timestamps(file_name):
+    """
+    :param file_name il nome del file del quale vogliamo ottenre i timestemps
+    :return la lista dei timestamp dato un file in input
+    """
     cursor = collection.find({"revision_history.file_name": file_name}, {"timestamp": 1, "_id": 0})
     i = 1
 
@@ -163,16 +157,16 @@ def get_all_file_timestamps(file_name):
         print(str(i) + " -> " + str(file_occurrence))
         i = i + 1
 
-
-'''
-.$ elemento di proiezione
-La funzione preso in input un file, ritorna i timestamp delle commit in cui è presente e se risuta readable o no.
-
-:return dizionario key:value  commit_timestamp : isReadable_value
-'''
+    return list(cursor)
 
 
 def get_file_timestamps_and_readable(file_name):
+    """
+    .$ elemento di proiezione
+    La funzione preso in input un file, ritorna i timestamp delle commit in cui è presente e se risuta readable o no.
+    :param file_name il nome del file del quale vogliamo ottenre i timestemps e la leggibilità relativa
+    :return dizionario key:value  commit_timestamp : isReadable_value
+    """
     cursor = collection.find({"revision_history.file_name": file_name},
                              {"timestamp": 1, "_id": 0, "revision_history.isReadable.$": 1}
                              )
@@ -194,12 +188,14 @@ def get_file_timestamps_and_readable(file_name):
     return file_Timestemps_Readability_dictionary
 
 
-'''
-La funzione ritorna un dizionario cone le informazioni da analizzare
-'''
-
-
 def data_file_dict(name_file, timestamps_file, readabilities_file):
+    """
+    La funzione ritorna un dizionario cone le informazioni da analizzare
+    :param
+
+    :return
+    """
+
     data_files_dict = {}
     data_files_dict['name_file'] = name_file
     data_files_dict['timestamps_file'] = timestamps_file
@@ -227,23 +223,9 @@ def get_most_unreadable():
                                              readabilities_file=list(file_details.values())
                                              )
                               )
-    #print all
+    # print all
     for index in data_file_list:
         print(index)
-
-
-'''
-Funzione per stampare i valori delle query
-- Stampe in base al caso
-S: Standard - Solo print
-'''
-
-
-def print_cursor(cursor, print_type):
-    if (print_type == "S"):
-        print(cursor)
-    else:
-        print("Print Error")
 
 
 # find_only_unreadable_file_byCommitID("bd2b0a632bfc5aabb408e7f47cfaa52a7d1b2b50")
@@ -251,13 +233,9 @@ def print_cursor(cursor, print_type):
 # get_all_commit_in_DB()
 # get_all_file()
 # get_all_file_timestamps("modules/benchmark/micro/src/main/java/org/elasticsearch/benchmark/index/engine/SimpleEngineBenchmark.java")
-A = "modules/elasticsearch/src/main/java/org/elasticsearch/index/merge/policy/LogByteSizeMergePolicyProvider.java"
+# A = "modules/elasticsearch/src/main/java/org/elasticsearch/index/merge/policy/LogByteSizeMergePolicyProvider.java"
 # get_all_file_timestamps_and_readable(A)
 # find_file_NotReadable_occurrence(A)
-#get_all_unreadable_file()
+# get_all_unreadable_file()
 get_most_unreadable()
 # get_all_file()
-
-# TODO:
-# - Capire se i timestamps sono ordinati
-# - Capire come mettere insieme file_name e valori del dizionario
