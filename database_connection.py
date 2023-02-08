@@ -153,8 +153,8 @@ def get_all_unreadable_file():
         # print(str(z) + ":" + str(noteReadable_file['revision_history']['file_name']) + "\n")
         unique_unreadable_file_names.add(noteReadable_file['revision_history']['file_name'])
 
-    for index, file in enumerate(unique_unreadable_file_names):
-        print(str(file) + "\n")
+    # for index, file in enumerate(unique_unreadable_file_names):
+    #    print(str(file) + "\n")
 
     print(len(unique_unreadable_file_names))
     return unique_unreadable_file_names
@@ -190,7 +190,7 @@ def get_file_timestamps_and_readable(file_name):
     commit_id = list()
 
     for file_occurrence in cursor:
-        readability.append(str(file_occurrence["revision_history"][0]['isReadable']))
+        readability.append(bool(file_occurrence["revision_history"][0]['isReadable']))
         timestamp.append(str(file_occurrence["timestamp"]))
         commit_id.append(str(file_occurrence["commit_id"]))
 
@@ -235,28 +235,67 @@ def get_Commit_Author(commit_id):
     return cursor['author_name']
 
 
+def get_all_authors():
+    """
+
+    :return: la lista senza duplicati di tutti gli autori presenti nel DB
+    """
+    cursor = collection.find({}, {"_id": 0, "author_name": 1})
+
+    authors_set = set()
+    for author in cursor:
+        authors_set.add(author['author_name'])
+        # print(author['author_name'])
+
+    for index, author in enumerate(authors_set):
+        print(str(index) + " -> " + author)
+
+
 def get_most_unreadable_author():
     """
     :param
     :return la funzione assegna agli autori che introducono file illegibili un intero che rappresenta il numero di file non leggibili introdotti in tutto il progetto
     """
-    for i in data_file_list:
-        for index, in_commit_file_readability in enumerate(i['readabilities_file']):
 
-            print("value: " + in_commit_file_readability)
-            if(in_commit_file_readability == str(False)):
-                print("False -> " + str(index))
-                print("---")
-                #TODO: Se è false devo prendere il commit giusto?
+    authors_set = set()
+    authors_dict = {}
 
+    for dict_file in data_file_list:
+        print("File: " + dict_file['name_file'])
+        for index, in_commit_file_readability in enumerate(dict_file['readabilities_file']):
 
+            # print( type(in_commit_file_readability))
+            if (in_commit_file_readability == False):
+                print("False    -> " + str(index + 1))
+                print("Commit_id->" + dict_file['commit_id_file'][index])
+                authors = get_Commit_Author(commit_id=dict_file['commit_id_file'][index])
+                print("Author   ->" + authors)
+                # authors_set.add(authors)
 
+                if authors in authors_dict:
+                    print("ESISTE")
+                    authors_dict[authors] = authors_dict[authors] + 1
+                else:
+                    print("NON ESISTE")
+                    authors_dict[authors] = 1
 
-            #print(i['timestamps_file'][index])
+                print("- - - - - -")
+            # print(i['timestamps_file'][index])
         print("\n")
-        break
+
+    # Lista degli autori ordinata decrescentemente per trovare i 10
+    authors_dict = sorted(authors_dict.items(), key=lambda x: x[1], reverse=True)
+
+    # Stampa il dizionario degli autori con le occorrenze
+    # print(len(authors_set))
+    # print(len(authors_dict.keys()))
+    # for key, value in authors_dict.items():
+    #    print(str(key) + " : " + str(value))
+    for index, j in enumerate(authors_dict):
+        print(str(index) + " - " + str(j[0]) + " : " + str(j[1]))
 
 
+# TODO: La logica dei false è sbagliata
 
 # find_only_unreadable_file_byCommitID("bd2b0a632bfc5aabb408e7f47cfaa52a7d1b2b50")
 # find_file_NotReadable_occurence("modules/elasticsearch/src/main/java/org/elasticsearch/action/bulk/TransportShardBulkAction.java")
@@ -272,5 +311,6 @@ get_most_unreadable()
 # get_all_timestamps_in_DB()
 # get_all_commit_in_DB()
 # print all
-get_Commit_Author("10f0eaad68557ff2aae92dd65e8f1b9037ea0942")
+# get_Commit_Author()
 get_most_unreadable_author()
+# get_all_authors()
