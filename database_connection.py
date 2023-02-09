@@ -182,19 +182,56 @@ def get_file_timestamps_and_readable(file_name):
     :param file_name il nome del file del quale vogliamo ottenre i timestemps e la leggibilità relativa
     :return dizionario key:value  commit_timestamp : isReadable_value
     """
+    # cursor = collection.find({"revision_history.file_name": file_name},
+    #                          {"timestamp": 1, "commit_id": 1, "_id": 0, "revision_history.isReadable.$": 1}
+    #                          )
+    """
+    Nella query ritoriniamo il valore isUnure perché dato che in input diamoil nome del file, questo è già un file 
+    trovato con score minore di 0.4 quindi adesso portandoci questo booleano abbiamo che se è True allora il file è leggibile
+    oppure siamo insicuri che lo sia. Mentre è false solo nel caso in cui è minore di 0.4. 
+    Abbiamo tre casi: 
+    isReadable  :   True    False   False
+    isUnsure    :   False   False   True
+    Il ".$" in MongoDB è un operatore proiezione che viene utilizzato per identificare un singolo elemento dell'array corrispondente alla condizione specificata nel documento di query. In questo caso, la query restituirà il documento che ha un elemento "revision_history" con un "file_name" specificato che corrisponde alla variabile "file_name". Il documento di output conterrà solo le proprietà "timestamp", "commit_id" e "revision_history.isUnsure.$".
+    
+    
     cursor = collection.find({"revision_history.file_name": file_name},
-                             {"timestamp": 1, "commit_id": 1, "_id": 0, "revision_history.isReadable.$": 1}
+                             {"timestamp": 1,
+                              "commit_id": 1,
+                              "_id": 0,
+                              "revision_history.$.isUnsure": 1,
+                              "revision_history.$.isReadable": 1}
                              )
+    """
+
+    pipeline = [
+        {"$match": {"revision_history.file_name": file_name}},
+        {"$unwind": "$revision_history"},
+        {"$match": {"revision_history.file_name": file_name}},
+        {"$project": {
+            "timestamp": 1,
+            "commit_id": 1,
+            "isUnsure": "$revision_history.isUnsure",
+            "isReadable": "$revision_history.isReadable"
+        }}
+    ]
+    cursor = collection.aggregate(pipeline)
+
     readability = list()
     timestamp = list()
     commit_id = list()
+    unsure = list()
 
     for file_occurrence in cursor:
-        readability.append(bool(file_occurrence["revision_history"][0]['isReadable']))
-        timestamp.append(str(file_occurrence["timestamp"]))
-        commit_id.append(str(file_occurrence["commit_id"]))
+        readability.append(bool(file_occurrence['isReadable']))
+        unsure.append(bool(file_occurrence['isUnsure']))
+        timestamp.append(str(file_occurrence['timestamp']))
+        commit_id.append(str(file_occurrence['commit_id']))
 
-    return {"timestamp": timestamp, "readability": readability, "commit_id": commit_id}
+    print({
+        "timestamp": timestamp, "readability": readability, "unsure": unsure, "commit_id": commit_id
+    })
+    return {"timestamp": timestamp, "readability": readability, "unsure": unsure, "commit_id": commit_id}
 
 
 def get_most_unreadable():
@@ -211,6 +248,7 @@ def get_most_unreadable():
                 "name_file": str(file),
                 "timestamps_file": file_details['timestamp'],
                 "readabilities_file": file_details['readability'],
+                "unsure": file_details['unsure'],
                 "commit_id_file": file_details['commit_id']
             }
         )
@@ -261,16 +299,26 @@ def get_most_unreadable_author():
     authors_dict = {}
 
     for dict_file in data_file_list:
-        print("File: " + dict_file['name_file'])
+        # print("ANother")
+        # print(dict_file)
+
         for index, in_commit_file_readability in enumerate(dict_file['readabilities_file']):
 
-            # print( type(in_commit_file_readability))
-            if (in_commit_file_readability == False):
+            # print(in_commit_file_readability)
+            # print(dict_file['readabilities_file'][index])
+            # print(dict_file['unsure'][index])
+            # print("\n")
+
+            '''
+            Questo controllo è necessario perché ci servono solamente gli autori dei file che sono illegibli 
+            sicuramente. Quindi sia isUnsure che isREadable sono false. 
+            '''
+            if ((dict_file['readabilities_file'][index] == False) and (dict_file['unsure'][index]) == False):
                 print("False    -> " + str(index + 1))
                 print("Commit_id->" + dict_file['commit_id_file'][index])
                 authors = get_Commit_Author(commit_id=dict_file['commit_id_file'][index])
                 print("Author   ->" + authors)
-                # authors_set.add(authors)
+                authors_set.add(authors)
 
                 if authors in authors_dict:
                     print("ESISTE")
@@ -280,17 +328,21 @@ def get_most_unreadable_author():
                     authors_dict[authors] = 1
 
                 print("- - - - - -")
+            else:
+                print("niente")
             # print(i['timestamps_file'][index])
-        print("\n")
+
+        # print("\n")
 
     # Lista degli autori ordinata decrescentemente per trovare i 10
     authors_dict = sorted(authors_dict.items(), key=lambda x: x[1], reverse=True)
 
     # Stampa il dizionario degli autori con le occorrenze
-    # print(len(authors_set))
-    # print(len(authors_dict.keys()))
+    print("SET_Length: " + str(len(authors_set)))
+    print("DIC_Length: " + str(len(authors_dict)))
     # for key, value in authors_dict.items():
     #    print(str(key) + " : " + str(value))
+
     for index, j in enumerate(authors_dict):
         print(str(index) + " - " + str(j[0]) + " : " + str(j[1]))
 
@@ -306,11 +358,24 @@ def get_most_unreadable_author():
 # get_all_file_timestamps_and_readable(A)
 # find_file_NotReadable_occurrence(A)
 # get_all_unreadable_file()
-get_most_unreadable()
+
 # get_all_file()
 # get_all_timestamps_in_DB()
 # get_all_commit_in_DB()
 # print all
 # get_Commit_Author()
-get_most_unreadable_author()
+
 # get_all_authors()
+
+
+get_most_unreadable()
+get_most_unreadable_author()
+
+# CASO
+# src/main/java/org/elasticsearch/index/query/CustomFiltersScoreQueryParser.java
+# {author_name : "jayson.minard"}
+
+# plugins/cloud/aws/src/main/java/org/elasticsearch/discovery/ec2/Ec2Discovery.java
+# {author_name : "Paul_Loy"}
+
+# get_file_timestamps_and_readable("src/main/java/org/elasticsearch/index/query/FilterBuilders.java")
