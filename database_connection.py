@@ -156,7 +156,7 @@ def get_all_unreadable_file():
     # for index, file in enumerate(unique_unreadable_file_names):
     #    print(str(file) + "\n")
 
-    print(len(unique_unreadable_file_names))
+    print("File illegibili: " + str(len(unique_unreadable_file_names)))
     return unique_unreadable_file_names
 
 
@@ -299,16 +299,8 @@ def get_most_unreadable_author():
     authors_dict = {}
 
     for dict_file in data_file_list:
-        # print("ANother")
-        # print(dict_file)
-
-        for index, in_commit_file_readability in enumerate(dict_file['readabilities_file']):
-
-            # print(in_commit_file_readability)
-            # print(dict_file['readabilities_file'][index])
-            # print(dict_file['unsure'][index])
-            # print("\n")
-
+        for index in range(len(dict_file['readabilities_file'])):
+            print("=> " + str(index))
             '''
             Questo controllo è necessario perché ci servono solamente gli autori dei file che sono illegibli 
             sicuramente. Quindi sia isUnsure che isREadable sono false. 
@@ -326,20 +318,17 @@ def get_most_unreadable_author():
                 else:
                     print("NON ESISTE")
                     authors_dict[authors] = 1
-
                 print("- - - - - -")
-            else:
-                print("niente")
-            # print(i['timestamps_file'][index])
-
-        # print("\n")
+                # Break the iterating on the first appearance of the False value in a file's readability
+                break
 
     # Lista degli autori ordinata decrescentemente per trovare i 10
     authors_dict = sorted(authors_dict.items(), key=lambda x: x[1], reverse=True)
 
     # Stampa il dizionario degli autori con le occorrenze
-    print("SET_Length: " + str(len(authors_set)))
-    print("DIC_Length: " + str(len(authors_dict)))
+    print("Author_SET_Length: " + str(len(authors_set)))
+    print("Author_DIC_Length: " + str(len(authors_dict)))
+    print("\n")
     # for key, value in authors_dict.items():
     #    print(str(key) + " : " + str(value))
 
