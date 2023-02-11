@@ -7,6 +7,7 @@ import os
 import pymongo
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from datetime import datetime
 
 # Varaibile per attivare l'inserimento dei file nel DB
 # Perché ho la 104 ed ho appena perso 10 minuti a capire perché nel DB ci fossero tante occorrenze con lo stesso commi_id -> perché ogni volta che avviavo lo script questo insieriva i duplicati
@@ -14,6 +15,7 @@ Populate_DB = False
 
 # creo il dizionario globale
 data_file_list = []
+interval_files_dict = {}
 
 try:
     localhost = "127.0.0.1"
@@ -228,10 +230,18 @@ def get_file_timestamps_and_readable(file_name):
         timestamp.append(str(file_occurrence['timestamp']))
         commit_id.append(str(file_occurrence['commit_id']))
 
-    print({
-        "timestamp": timestamp, "readability": readability, "unsure": unsure, "commit_id": commit_id
-    })
     return {"timestamp": timestamp, "readability": readability, "unsure": unsure, "commit_id": commit_id}
+
+
+def get_minutes_delta(first_timestamp, second_timestamp):
+    '''
+    @param: timestamp iniziale e timestamp finale
+    @return: l'intervallo che divide le due date in minuti (float)
+    '''
+    delta_seconds = int(second_timestamp) - int(first_timestamp)
+    delta_minutes = delta_seconds / 60
+    print("Delta: " + str(delta_minutes))
+    return delta_minutes
 
 
 def get_most_unreadable():
@@ -239,6 +249,9 @@ def get_most_unreadable():
     all_unreadable_file_set = get_all_unreadable_file()
 
     for file in all_unreadable_file_set:
+        first_timestamp = 0
+        second_timestamp = 0
+
         # otteniamo i valori del file analizzato
         file_details = get_file_timestamps_and_readable(str(file))
 
@@ -258,8 +271,40 @@ def get_most_unreadable():
             print("Error in dict array lenght - Function: data_file_dict")
             raise
 
+        print(len(file_details['readability']))
+        for index in range(len(file_details['readability'])):
+            if (file_details['readability'][index] == False) and (file_details['unsure'][index] == False):
+                print("Equals")
+                print(index)
+                if first_timestamp == 0:
+                    # primo caso
+                    first_timestamp = file_details['timestamp'][index]
+                    interval_files_dict[str(file)] = 0
+                    # TODO: CAso da valutare un solo Flse
+
+                elif index == (len(file_details['readability']) - 1):
+                    # caso ultimo false dell'array
+                    second_timestamp = file_details['timestamp'][index]
+                    interval_files_dict[str(file)] += get_minutes_delta(
+                        first_timestamp=first_timestamp,
+                        second_timestamp=second_timestamp
+                    )
+                else:
+                    # false intermedio non si aggiunge
+                    second_timestamp = file_details['timestamp'][index]
+            elif (file_details['unsure'][index] == True) and (file_details['readability'][index] == False):
+                # caso in cui siamo incerti e quindi bisogna prendere il precendente e calcoliamo
+                second_timestamp = file_details['timestamp'][index - 1]
+                interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
+                                                                    second_timestamp=second_timestamp)
+
+            print("T1: " + str(first_timestamp) + "\n" + "T2: " + str(second_timestamp))
+        break
+
     for index in data_file_list:
         print(index)
+    # for file_delta in interval_files_dict:
+    print(interval_files_dict)
 
 
 def get_Commit_Author(commit_id):
@@ -358,7 +403,7 @@ def get_most_unreadable_author():
 
 
 get_most_unreadable()
-get_most_unreadable_author()
+# get_most_unreadable_author()
 
 # CASO
 # src/main/java/org/elasticsearch/index/query/CustomFiltersScoreQueryParser.java
