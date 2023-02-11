@@ -3,6 +3,7 @@ Connessione al database MongoDB
 '''
 import json
 import os
+from _operator import itemgetter
 
 import pymongo
 from pymongo import MongoClient
@@ -249,8 +250,6 @@ def get_most_unreadable():
     all_unreadable_file_set = get_all_unreadable_file()
 
     for file in all_unreadable_file_set:
-        first_timestamp = 0
-        second_timestamp = 0
 
         # otteniamo i valori del file analizzato
         file_details = get_file_timestamps_and_readable(str(file))
@@ -271,7 +270,10 @@ def get_most_unreadable():
             print("Error in dict array lenght - Function: data_file_dict")
             raise
 
+        first_timestamp = 0
+        second_timestamp = 0
         print(len(file_details['readability']))
+        interval_files_dict[str(file)] = 0
         for index in range(len(file_details['readability'])):
             if (file_details['readability'][index] == False) and (file_details['unsure'][index] == False):
                 print("Equals")
@@ -285,26 +287,31 @@ def get_most_unreadable():
                 elif index == (len(file_details['readability']) - 1):
                     # caso ultimo false dell'array
                     second_timestamp = file_details['timestamp'][index]
-                    interval_files_dict[str(file)] += get_minutes_delta(
-                        first_timestamp=first_timestamp,
-                        second_timestamp=second_timestamp
-                    )
+                    interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
+                                                                        second_timestamp=second_timestamp)
+                    print(interval_files_dict)
                 else:
                     # false intermedio non si aggiunge
                     second_timestamp = file_details['timestamp'][index]
             elif (file_details['unsure'][index] == True) and (file_details['readability'][index] == False):
-                # caso in cui siamo incerti e quindi bisogna prendere il precendente e calcoliamo
-                second_timestamp = file_details['timestamp'][index - 1]
-                interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
-                                                                    second_timestamp=second_timestamp)
-
+                if file_details['unsure'][index - 1] == False:
+                    # caso in cui siamo incerti e quindi bisogna prendere il precendente e calcoliamo
+                    second_timestamp = file_details['timestamp'][index - 1]
+                    interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
+                                                                        second_timestamp=second_timestamp)
+                    first_timestamp = 0
+                    second_timestamp = 0
+                    print(interval_files_dict)
             print("T1: " + str(first_timestamp) + "\n" + "T2: " + str(second_timestamp))
-        break
+        # break
 
-    for index in data_file_list:
-        print(index)
+    #for index in data_file_list:
+    #    print(index)
     # for file_delta in interval_files_dict:
-    print(interval_files_dict)
+    #print(interval_files_dict)
+    sorted_files_deltaTime = sorted(interval_files_dict.items(), key=itemgetter(1), reverse=True)
+    for time in sorted_files_deltaTime:
+        print(time[1])
 
 
 def get_Commit_Author(commit_id):
@@ -413,3 +420,4 @@ get_most_unreadable()
 # {author_name : "Paul_Loy"}
 
 # get_file_timestamps_and_readable("src/main/java/org/elasticsearch/index/query/FilterBuilders.java")
+
