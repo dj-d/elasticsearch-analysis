@@ -272,29 +272,42 @@ def get_most_unreadable():
 
         first_timestamp = 0
         second_timestamp = 0
+        only_one = False
         print(len(file_details['readability']))
         interval_files_dict[str(file)] = 0
         for index in range(len(file_details['readability'])):
             if (file_details['readability'][index] == False) and (file_details['unsure'][index] == False):
                 print("Equals")
                 print(index)
-                if first_timestamp == 0:
+
+                if index == (len(file_details['readability']) - 1):
+                    if len(file_details['readability']) == 1:
+                        print("Solo elemento")
+                        # caso di un solo elemento nell'array
+                        second_timestamp = 0
+                    else:
+                        if file_details['readability'][index - 1] == True or file_details['unsure'][index - 1] == True:
+                            # caso ultimo false dell'array con precedenti True non si conta intervallo
+                            second_timestamp = 0
+                        else:
+                            second_timestamp = file_details['timestamp'][index]
+                            interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
+                                                                                second_timestamp=second_timestamp)
+                    print(interval_files_dict)
+
+                elif first_timestamp == 0:
                     # primo caso
                     first_timestamp = file_details['timestamp'][index]
-                    interval_files_dict[str(file)] = 0
+                    interval_files_dict[str(file)] += 0
+                    only_one = True
                     # TODO: CAso da valutare un solo Flse
 
-                elif index == (len(file_details['readability']) - 1):
-                    # caso ultimo false dell'array
-                    second_timestamp = file_details['timestamp'][index]
-                    interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
-                                                                        second_timestamp=second_timestamp)
-                    print(interval_files_dict)
                 else:
                     # false intermedio non si aggiunge
                     second_timestamp = file_details['timestamp'][index]
-            elif (file_details['unsure'][index] == True) and (file_details['readability'][index] == False):
-                if file_details['unsure'][index - 1] == False:
+                    only_one = False
+            elif (file_details['readability'][index] == False) and (file_details['unsure'][index] == True):
+                if file_details['unsure'][index - 1] == False and only_one == False:
                     # caso in cui siamo incerti e quindi bisogna prendere il precendente e calcoliamo
                     second_timestamp = file_details['timestamp'][index - 1]
                     interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
@@ -302,13 +315,31 @@ def get_most_unreadable():
                     first_timestamp = 0
                     second_timestamp = 0
                     print(interval_files_dict)
-            print("T1: " + str(first_timestamp) + "\n" + "T2: " + str(second_timestamp))
-        # break
+                elif only_one == True:
+                    # caso solo un false ed unsure True
+                    second_timestamp = file_details['timestamp'][index]
+                    interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
+                                                                        second_timestamp=second_timestamp)
+                    only_one = False
+                    first_timestamp = 0
+                    second_timestamp = 0
+            elif (file_details['readability'][index] == True) and (file_details['unsure'][index] == False):
 
-    #for index in data_file_list:
-    #    print(index)
+                if only_one == True:
+                    # Solo un false ed unreadable True
+                    second_timestamp = file_details['timestamp'][index]
+                    interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
+                                                                        second_timestamp=second_timestamp)
+                    only_one = False
+                    first_timestamp = 0
+                    second_timestamp = 0
+            print("T1: " + str(first_timestamp) + "\n" + "T2: " + str(second_timestamp))
+        break
+
+    for index in data_file_list:
+        print(index)
     # for file_delta in interval_files_dict:
-    #print(interval_files_dict)
+    # print(interval_files_dict)
     sorted_files_deltaTime = sorted(interval_files_dict.items(), key=itemgetter(1), reverse=True)
     for time in sorted_files_deltaTime:
         print(time[1])
@@ -420,4 +451,3 @@ get_most_unreadable()
 # {author_name : "Paul_Loy"}
 
 # get_file_timestamps_and_readable("src/main/java/org/elasticsearch/index/query/FilterBuilders.java")
-
