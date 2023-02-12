@@ -217,8 +217,7 @@ def get_file_timestamps_and_readable(file_name):
             "commit_id": 1,
             "isUnsure": "$revision_history.isUnsure",
             "isReadable": "$revision_history.isReadable"
-        }},
-        {"$sort": {"timestamp": 1}}
+        }},{"$sort": {"timestamp": 1}}
     ]
     cursor = collection.aggregate(pipeline)
 
@@ -256,6 +255,7 @@ def get_most_unreadable():
         #file = "modules/elasticsearch/src/test/java/org/elasticsearch/transport/netty/SimpleNettyTransportTests.java"
         #file ="src/main/java/org/elasticsearch/common/logging/log4j/LogConfigurator.java"
         #file = "src/test/java/org/elasticsearch/index/mapper/binary/BinaryMappingTests.java"
+        #file = "src/test/java/org/elasticsearch/script/javascript/JavaScriptScriptSearchTests.java"
 
         # otteniamo i valori del file analizzato
         file_details = get_file_timestamps_and_readable(str(file))
@@ -344,7 +344,7 @@ def get_most_unreadable():
                     first_timestamp = 0
                     second_timestamp = 0
             print("T1: " + str(first_timestamp) + "\n" + "T2: " + str(second_timestamp))
-        #break
+       # break
 
     for index in data_file_list:
         print(index)
@@ -352,10 +352,10 @@ def get_most_unreadable():
     # print(interval_files_dict)
     sorted_files_deltaTime = sorted(interval_files_dict.items(), key=itemgetter(1), reverse=True)
 
-    with open("output.csv", "w", newline="") as file:
+    with open("output_files.csv", "w", newline="") as file:
         writer = csv.writer(file)
         for time in sorted_files_deltaTime:
-            #print(time[1])
+            print(time[1])
             #file.write(str(time) + "\n")
             writer.writerow([time[0], time[1]])
 
@@ -430,8 +430,12 @@ def get_most_unreadable_author():
     # for key, value in authors_dict.items():
     #    print(str(key) + " : " + str(value))
 
-    for index, j in enumerate(authors_dict):
-        print(str(index) + " - " + str(j[0]) + " : " + str(j[1]))
+    with open("output_authors.csv", "w", newline="", encoding="utf-8") as file_auth:
+        writer_auth = csv.writer(file_auth)
+        for index, author in enumerate(authors_dict):
+            print(str(index) + " - " + str(author[0]) + " : " + str(author[1]))
+            writer_auth.writerow([author[0], author[1]])
+
 
 
 # TODO: La logica dei false è sbagliata
@@ -456,7 +460,7 @@ def get_most_unreadable_author():
 
 
 get_most_unreadable()
-# get_most_unreadable_author()
+get_most_unreadable_author()
 
 # CASO
 # src/main/java/org/elasticsearch/index/query/CustomFiltersScoreQueryParser.java
