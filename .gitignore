@@ -6,9 +6,9 @@
 
 #Pyhton
 venv/
-__pychache__/
+__pycache__/
 
-!constants.pyc
+constants.pyc
 
 #Test
 Results_Test/
