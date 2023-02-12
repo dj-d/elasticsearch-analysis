@@ -1,5 +1,3 @@
-import os
-import json
 import csv
 from _operator import itemgetter
 
