@@ -15,6 +15,9 @@ services:
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
       - ${PATH_ARCHIVE:-./archive}:/archive
 
+    networks:
+      - mongodb_network
+
     environment:
       ALLOW_EMPTY_PASSWORD: no
       MONGODB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-root}
@@ -31,4 +34,9 @@ services:
 
 volumes:
   mongodb_data:
+    name: mongodb_data
     driver: local
+
+networks:
+  mongodb_network:
+    name: ${MONGODB_NETWORK:-mongodb_network}
