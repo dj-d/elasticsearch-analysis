@@ -11,11 +11,16 @@ from pymongo.errors import ConnectionFailure
 from datetime import datetime
 import csv
 
-# Varaibile per attivare l'inserimento dei file nel DB
-# Perché ho la 104 ed ho appena perso 10 minuti a capire perché nel DB ci fossero tante occorrenze con lo stesso commi_id -> perché ogni volta che avviavo lo script questo insieriva i duplicati
+'''
+If true initializes the database
+'''
 Populate_DB = False
 
-# creo il dizionario globale
+'''
+- GLOBAL VARIABLES
+@data_file_list: The list of all files with readability and time values to analyze
+@interval_files_dict: A dictionary where the key is the file_name and the value is an integer expressing the minutes of unreadability
+'''
 data_file_list = []
 interval_files_dict = {}
 
@@ -29,12 +34,11 @@ except ConnectionFailure as e:
     print("Could not connect to MongoDB")
     print(e)
 
-# Path alla directory dei file
+# Json results directory Path
 results_directory = "Results"
-# results_directory = "Results_Test"
 
+# Database
 db = client["Revision_History_DB"]
-# reference al database
 collection = db["Revision_Collection"]
 print("DB -> " + str(db))
 
@@ -51,46 +55,33 @@ if (Populate_DB):
 
 def get_all_commit_in_DB():
     """
-    :return: la lista degli id dei commit presenti nel Database
+    :return: the list of commit ids in the Database
     """
     cursor = collection.find({}, {"commit_id": 1})
-
     for i in cursor:
         print(i["commit_id"])
-
     return list(cursor)
 
 
 def get_all_file():
     """
-    La funzione restituisce tutti i file presenti nel database
-    Per farlo utilizza la struttura set() che non può contenere duplicati
-    dunque ogni file occorre una sola volta
-
-    :return  Lista di tutti i file presenti nel DB
+    :return List of all readable and unreadable files in the DB
     """
     cursor = collection.find({}, {"revision_history.file_name": 1, "_id": 0})
-
-    # Set per inserire i nomi di file unici
-    # Set non può contenere duplicati
     unique_file_names = set()
 
     for commit_files in cursor:
         for file in commit_files['revision_history']:
             unique_file_names.add(file['file_name'])
 
-    # stampa la lista dei file
-    for file in unique_file_names:
-        print(file)
-
     print("Total Files: " + str(len(unique_file_names)))
-
     return unique_file_names
 
 
 def get_all_unreadable_file():
     '''
-    :return la lista di tutti i file che risultano unreadable quindi i file nel DB che hanno almeno uno score inferiore a 0.4 in una commit
+    :return List of all files that are unreadable therefore the files in the DB that have
+            at least a score lower than 0.4 in a commit
     '''
 
     cursor = collection.aggregate([
@@ -98,28 +89,20 @@ def get_all_unreadable_file():
         {'$match': {'revision_history.score': {"$gte": 0, "$lt": 0.4}}}
     ])
 
-    # Set per inserire i nomi di file unici
-    # Set non può contenere duplicati
     unique_unreadable_file_names = set()
 
-    z = 1
     for noteReadable_file in cursor:
-        # print(str(z) + ":" + str(noteReadable_file['revision_history']['file_name']) + "\n")
         unique_unreadable_file_names.add(noteReadable_file['revision_history']['file_name'])
 
-    # for index, file in enumerate(unique_unreadable_file_names):
-    #    print(str(file) + "\n")
-
-    print("File illegibili: " + str(len(unique_unreadable_file_names)))
+    print("Unreadable Files: " + str(len(unique_unreadable_file_names)))
     return unique_unreadable_file_names
 
 
 def get_file_timestamps_and_readable(file_name):
     """
-    .$ elemento di proiezione
-    La funzione preso in input un file, ritorna i timestamp delle commit in cui è presente e se risuta readable o no.
-    :param file_name il nome del file del quale vogliamo ottenre i timestemps e la leggibilità relativa
-    :return dizionario key:value  commit_timestamp : isReadable_value
+    The function takes a file as input, returns the timestamps of the commits in which it is present and whether it is readable or not.
+    :param file_name the name of the file of which we want to obtain the relative times and readability
+    :return dictionary with the listed values of timestamps, readability and commit_id related to readability
     """
     pipeline = [
         {"$match": {"revision_history.file_name": file_name}},
@@ -150,8 +133,8 @@ def get_file_timestamps_and_readable(file_name):
 
 def get_minutes_delta(first_timestamp, second_timestamp):
     '''
-    @param: timestamp iniziale e timestamp finale
-    @return: l'intervallo che divide le due date in minuti (float)
+    @param: initial and final timestamp
+    @return: the interval that divides the two dates in minutes (float)
     '''
     delta_seconds = int(second_timestamp) - int(first_timestamp)
     delta_minutes = delta_seconds / 60
@@ -160,13 +143,14 @@ def get_minutes_delta(first_timestamp, second_timestamp):
 
 
 def get_most_unreadable():
-    # prende solo i file illegibili nel DB
+    # get the unreadable files in the DB
     print("Find all commits files...")
     all_unreadable_file_set = get_all_unreadable_file()
 
     for analyzed_file_index, file in enumerate(all_unreadable_file_set):
-        print("Analyzing: (" + str(analyzed_file_index + 1) + "/" + str(len(all_unreadable_file_set)) + ") -> " + str(file))
-        # otteniamo i valori del file analizzato
+        print("Analyzing: (" + str(analyzed_file_index + 1) + "/" + str(len(all_unreadable_file_set)) + ") -> " + str(
+            file))
+        # get the values [timestamp, readabilty and commit_ids] of the input file
         file_details = get_file_timestamps_and_readable(str(file))
 
         # popolare la lista con i dizionari
@@ -193,11 +177,11 @@ def get_most_unreadable():
             if (file_details['readability'][index] == False) and (file_details['unsure'][index] == False):
                 if index == (len(file_details['readability']) - 1):
                     if len(file_details['readability']) == 1:
-                        # caso di un solo elemento nell'array
+                        # case: only one element in the array
                         second_timestamp = 0
                     else:
                         if file_details['readability'][index - 1] == True or file_details['unsure'][index - 1] == True:
-                            # caso ultimo false dell'array con precedenti True non si conta intervallo
+                            # case: last false of array with previous True. No range is counted.
                             second_timestamp = 0
                         else:
                             second_timestamp = file_details['timestamp'][index]
@@ -206,26 +190,26 @@ def get_most_unreadable():
 
 
                 elif first_timestamp == 0:
-                    # primo caso
+                    # case: First case
                     first_timestamp = file_details['timestamp'][index]
                     interval_files_dict[str(file)] += 0
                     only_one = True
 
                 else:
-                    # false intermedio non si aggiunge
+                    # case: intermediate false does not add
                     second_timestamp = file_details['timestamp'][index]
                     only_one = False
             elif (file_details['readability'][index] == False) and (file_details['unsure'][index] == True):
                 if file_details['unsure'][
                     index - 1] == False and only_one == False and index != 0 and first_timestamp != 0:
-                    # caso in cui siamo incerti e quindi bisogna prendere il precendente e calcoliamo
+                    # case: uncertain and therefore we need to take the previous one and calculate
                     second_timestamp = file_details['timestamp'][index - 1]
                     interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
                                                                         second_timestamp=second_timestamp)
                     first_timestamp = 0
                     second_timestamp = 0
                 elif only_one == True:
-                    # caso solo un false ed unsure True
+                    # case: just one false and unsure True
                     second_timestamp = file_details['timestamp'][index]
                     interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
                                                                         second_timestamp=second_timestamp)
@@ -234,7 +218,7 @@ def get_most_unreadable():
                     second_timestamp = 0
             elif (file_details['readability'][index] == True) and (file_details['unsure'][index] == False):
                 if only_one == True:
-                    # Solo un false ed unreadable True
+                    # case: only one false and unreadable True
                     second_timestamp = file_details['timestamp'][index]
                     interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
                                                                         second_timestamp=second_timestamp)
@@ -252,8 +236,8 @@ def get_most_unreadable():
 
 def get_Commit_Author(commit_id):
     """
-    :param  l'ID di una commit
-    :return il nome dell'autore della commit
+    :param  l'ID of one commit
+    :return the name of the commit Author
     """
     cursor = collection.find_one({"commit_id": str(commit_id)}, {"_id": 0, "author_name": 1})
 
@@ -262,8 +246,7 @@ def get_Commit_Author(commit_id):
 
 def get_all_authors():
     """
-
-    :return: la lista senza duplicati di tutti gli autori presenti nel DB
+    :return: List without duplicates of all the authors present in the DB
     """
     cursor = collection.find({}, {"_id": 0, "author_name": 1})
 
@@ -279,7 +262,8 @@ def get_all_authors():
 def get_most_unreadable_author():
     """
     :param
-    :return la funzione assegna agli autori che introducono file illegibili un intero che rappresenta il numero di file non leggibili introdotti in tutto il progetto
+    :return the function assigns to authors who introduce unreadable files
+            an integer representing the number of unreadable files introduced in the whole project
     """
 
     authors_dict = {}
@@ -287,8 +271,8 @@ def get_most_unreadable_author():
     for dict_file in data_file_list:
         for index in range(len(dict_file['readabilities_file'])):
             '''
-            Questo controllo è necessario perché ci servono solamente gli autori dei file che sono illegibli 
-            sicuramente. Quindi sia isUnsure che isREadable sono false. 
+            This check is necessary because we only need the authors of files that are unreadable.
+            So both isUnsure and isREadable need to be FASLE.
             '''
             if ((dict_file['readabilities_file'][index] == False) and (dict_file['unsure'][index]) == False):
                 authors = get_Commit_Author(commit_id=dict_file['commit_id_file'][index])
@@ -299,10 +283,9 @@ def get_most_unreadable_author():
                 # Break the iterating on the first appearance of the False value in a file's readability
                 break
 
-    # Lista degli autori ordinata decrescentemente per trovare i 10
+    # List of authors sorted in descending order to find the 10
     authors_dict = sorted(authors_dict.items(), key=lambda x: x[1], reverse=True)
 
-    # Stampa il dizionario degli autori con le occorrenze
     print("Author_DIC_Length: " + str(len(authors_dict)))
     print("\n")
 
