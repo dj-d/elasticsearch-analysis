@@ -1,11 +1,32 @@
-# docker-compose up
-
-version: '3.9'
+version: "3.9"
 
 services:
-  mongoDB:
-    image: 'bitnami/mongodb'
-    container_name: 'MongoDB_container'
-    ports:
-      - "27017:27017"
+  mongodb:
+    container_name: ${MONGO_CONTAINER_NAME:-mongodb}
+    image: bitnami/mongodb:${MONGO_VERSION:-6.0}
 
+    restart: always
+
+    ports:
+      - ${PORT:-27017}:27017
+
+    volumes:
+      - mongodb_data:/bitnami/mongodb
+
+    environment:
+      ALLOW_EMPTY_PASSWORD: no
+      MONGODB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-root}
+      MONGODB_USERNAME: ${MONGO_USERNAME:-user}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-password}
+      MONGODB_DATABASE: ${MONGO_DATABASE:-revision_history_db}
+
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  mongodb_data:
+    driver: local
