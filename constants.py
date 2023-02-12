@@ -11,3 +11,5 @@ END_COMMIT = int(os.getenv('END_COMMIT', default=10))
 
 FILES_LOCATION = os.getenv('FILES_LOCATION', default=None)
 OUTPUT_JSON_NAME = os.getenv('OUTPUT_JSON_NAME', default='output.json')
+
+MONGODB_ROOT_PASSWORD = os.getenv('MONGODB_ROOT_PASSWORD', default='root')
