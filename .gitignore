@@ -1,20 +1,20 @@
-#PySharm
+# PyCharm
 .idea/
 
-#env
+# Python
+__pycache__/
+venv/
+*.pyc
+
+# Env
 .env
 
-#Pyhton
-venv/
-__pycache__/
+# Files
+*.txt
+*.log
+*.json
+*.swp
+**/test.py
 
-constants.pyc
-
-#Test
-Results_Test/
-results/
-output.csv
-output_authors.csv
-output_files.csv
-Supporto
-Results/
+# Excluded files
+!requirements.txt

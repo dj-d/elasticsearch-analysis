@@ -1,36 +1,133 @@
-```shell
-git log --pretty=format:"%H|%an|%at" > /home/dj-d/Repositories/GitHub/asd_exam/history.txt
+# ElasticSearch Analysis
+
+- [ElasticSearch Analysis](#elasticsearch-analysis)
+  - [Introduction](#introduction)
+  - [Methodology](#methodology)
+  - [Test replication](#test-replication)
+    - [Requirements](#requirements)
+    - [How to create the dataset](#how-to-create-the-dataset)
+    - [How to run the analysis](#how-to-run-the-analysis)
+  - [References](#references)
+
+## Introduction
+
+This repository was created to analyze the history of the Elasticsearch project.
+
+The goal was to go in search of the **5 Java classes that have been unreadable for the longest time** and the **10 developers who have introduced the most unreadable classes** into the project.
+
+## Methodology
+
+The methodology used for our tests was as follows:
+
+Once we downloaded the Git repository of the affected code (in our case Elasticsearch), to get the complete history of the project, starting from the first commit, we used the following command:
+
+`git log --reverse --pretty=format:"%H|%an|%at"`
+
+Once executed we will get in output a list of strings that will be composed in the following way:
+
+```text
+...
+<commit_hash>|<author_name>|<commit_timestamp>
+...
 ```
 
-- ```%H``` - commit hash
-- ```%an``` - author name
-- ```%at``` - author time, UNIX timestamp
+Once this was done, from each commit, all the file names that were changed in that specific commit were extracted using the following command:
 
-```shell
-git show --name-only --pretty="" <commit-id>
-```
+`git show --name-only --pretty=format:\"\" <commit_hash>`
 
-### Steps
+Finally, for each of the extracted files, the readability score was calculated using the following [tool](https://dibt.unimol.it/report/readability/).
 
-- [ ] Create a new repository on GitHub
-- [ ] Setup MongoDB
-- [ ] Populate MongoDB with data
-  ```json
-    {
-        "commit_id": "",
-        "author_name": "",
-        "author_date": "",
-        "unreadable_classes": [
-            {
-                "file_name": "",
-                "score": ""
-            }
-        ]
-    }
-  ```
-- [x] Method to get the list of files in a commit
-- [x] Method to get the readability score of a file
+The tool returns a value between 0 and 1 that goes to indicate the probability that the class is readable.
 
-### References
+| Value           | Meaning    |
+| --------------- | ---------- |
+| 0 <= x < 0.4    | Unreadable |
+| 0.4 <= x <= 0.6 | Unsure*    |
+| 0.6 < x <= 1    | Readable   |
+
+---
+
+***Unsure\***: This term is used to indicate that you are not sure whether the class is readable or not*
+
+---
+
+Then a JSON file was created containing all the results of the analysis (of course, before the file was analyzed, the commit was moved to get the correct status of the file using the command `git checkout <commit_hash>`)
+
+## Test replication
+
+In case you would like to replicate the study, you can find the dataset used from the following [link](https://www.kaggle.com/datasets/djalba/elasticsearch-history).
+
+While as for the tool you can download it from this [link](https://dibt.unimol.it/report/readability/files/readability.zip)
+
+### Requirements
+
+- Python 3.6+
+- Java 8+
+- Docker
+- Docker Compose
+
+### How to create the dataset
+
+In case you want to create a new dataset to work on, you can proceed as follows:
+
+- Clone the repository.
+
+    ```bash
+    git clone https://github.com/dj-d/elasticsearch-analysis.git
+
+    cd elasticsearch-analysis
+    ```
+
+- Clone the Elasticsearch project.
+
+    ```bash
+    git clone https://github.com/elastic/elasticsearch.git
+    ```
+
+- Create a virtual environment and install dependencies.
+
+    ```bash
+    # Create virtual environment
+    python3 -m venv venv
+
+    # Activate virtual environment
+    source venv/bin/activate
+
+    # Install dependencies
+    pip install -r requirements.txt
+    ```
+
+- Create a file named `.env` in the main folder of this project and add the following environment variables.
+
+    ```env
+    PROJECT_PATH=/main/path/of/the/project/to/analyze/
+    TOOL_PATH=/main/path/of/the/tool/to/be/used/
+
+    START_COMMIT=0 # Start commit index
+    END_COMMIT=100 # End commit index
+
+    FILES_LOCATION=/path/where/to/save/the/generated/files
+    OUTPUT_JSON_NAME=file_name.json
+    ```
+
+    Note that, the tool used in our experiments, is also present within our repository, so you will not need to download it, but just add the path within the `.env` file
+
+---
+
+***Note**: I have no idea what to do on **winzoz**, I have not tested it, so "**Long live Linux**"*
+
+---
+
+- Now you can run the script.
+
+    ```bash
+    python main.py
+    ```
+
+### How to run the analysis
+
+<!-- TODO -->
+
+## References
 
 - [Git - git-log Documentation](https://git-scm.com/docs/pretty-formats)
