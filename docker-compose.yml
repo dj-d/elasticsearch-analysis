@@ -12,13 +12,15 @@ services:
 
     volumes:
       - mongodb_data:/bitnami/mongodb
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - ${PATH_ARCHIVE:-./archive}:/archive
 
     environment:
       ALLOW_EMPTY_PASSWORD: no
       MONGODB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-root}
       MONGODB_USERNAME: ${MONGO_USERNAME:-user}
       MONGODB_PASSWORD: ${MONGO_PASSWORD:-password}
-      MONGODB_DATABASE: ${MONGO_DATABASE:-revision_history_db}
+      MONGODB_DATABASE: revision_history_db
 
     healthcheck:
       test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet

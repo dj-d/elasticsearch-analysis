@@ -1,20 +1,12 @@
-'''
-Connessione al database MongoDB
-'''
-import json
 import os
+import json
+import csv
 from _operator import itemgetter
 
-import pymongo
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-from datetime import datetime
-import csv
 
-'''
-If true initializes the database
-'''
-Populate_DB = False
+from constants import MONGODB_ROOT_PASSWORD
 
 '''
 - GLOBAL VARIABLES
@@ -25,33 +17,21 @@ data_file_list = []
 interval_files_dict = {}
 
 try:
-    localhost = "127.0.0.1"
+    user = "root"
+    password = MONGODB_ROOT_PASSWORD
+    host = "0.0.0.0"
     port = 27017
-    client = MongoClient(host=localhost, port=port)
+    client = MongoClient(f"mongodb://{user}:{password}@{host}:{port}")
     print("MongoDB is reachable")
     print("DB -> " + str(client))
 except ConnectionFailure as e:
     print("Could not connect to MongoDB")
     print(e)
 
-# Json results directory Path
-results_directory = "Results"
-
 # Database
-db = client["Revision_History_DB"]
-collection = db["Revision_Collection"]
+db = client["revision_history_db"]
+collection = db["revision_history_collection"]
 print("DB -> " + str(db))
-
-if (Populate_DB):
-    for results_commits_json in os.listdir(results_directory):
-        path_file_in_dir = os.path.join(results_directory, results_commits_json)
-        print("File_Name: " + results_commits_json + "  ---  File_Path: " + path_file_in_dir)
-
-        # inserimento dei file nel DB
-        with open(path_file_in_dir) as json_file:
-            iters_json = json.load(json_file)
-            collection.insert_many(iters_json)
-
 
 def get_all_commit_in_DB():
     """
