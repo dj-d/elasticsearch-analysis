@@ -53,6 +53,13 @@ The tool returns a value between 0 and 1 that goes to indicate the probability t
 
 Then a JSON file was created containing all the results of the analysis (of course, before the file was analyzed, the commit was moved to get the correct status of the file using the command `git checkout <commit_hash>`)
 
+We then proceeded to insert all this data within MongoDB, so that we could conveniently create queries that would allow us to extract the analyzed data.
+
+For this very reason, queries were created that allowed us to obtain:
+
+- **5 Java classes that have been unreadable for the longest time**
+- **10 developers who have introduced the most unreadable classes**
+
 ## Test replication
 
 In case you would like to replicate the study, you can find the dataset used from the following [link](https://www.kaggle.com/datasets/djalba/elasticsearch-history).
@@ -126,7 +133,34 @@ In case you want to create a new dataset to work on, you can proceed as follows:
 
 ### How to run the analysis
 
-<!-- TODO -->
+To perform the tests, you must proceed using the following instructions:
+
+- Download the dataset from the following [link](https://www.kaggle.com/datasets/djalba/elasticsearch-history) (unless it was created in the [previous step](#how-to-create-the-dataset)).
+- Now you need to add a new environment variable (you can add it either to an existing .env file or in a new one in case it is missing)
+
+    ```env
+    ...
+    PATH_ARCHIVE=/path/to/the/downloaded/dataset
+
+    MONGODB_ROOT_PASSWORD=ROOT_PASSWORD
+    MONGODB_USERNAME=USER_NAME
+    MONGODB_PASSWORD=USER_PASSWORD
+    ...
+    ```
+
+- Now you need to start the MongoDB container.
+
+    ```bash
+    docker-compose up -d
+    ```
+
+- Now you can run the analysis.
+
+    ```bash
+    python database_connection.py
+    ```
+
+- Once the script has completed its execution, within the root directory of this project, there will be two .csv files with the results of the analysis.
 
 ## References
 
