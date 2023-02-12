@@ -9,6 +9,7 @@ import pymongo
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from datetime import datetime
+import csv
 
 # Varaibile per attivare l'inserimento dei file nel DB
 # Perché ho la 104 ed ho appena perso 10 minuti a capire perché nel DB ci fossero tante occorrenze con lo stesso commi_id -> perché ogni volta che avviavo lo script questo insieriva i duplicati
@@ -29,8 +30,8 @@ except ConnectionFailure as e:
     print(e)
 
 # Path alla directory dei file
-# results_directory = "Results"
-results_directory = "Results_Test"
+results_directory = "Results"
+#results_directory = "Results_Test"
 
 db = client["Revision_History_DB"]
 # reference al database
@@ -216,7 +217,8 @@ def get_file_timestamps_and_readable(file_name):
             "commit_id": 1,
             "isUnsure": "$revision_history.isUnsure",
             "isReadable": "$revision_history.isReadable"
-        }}
+        }},
+        {"$sort": {"timestamp": 1}}
     ]
     cursor = collection.aggregate(pipeline)
 
@@ -250,6 +252,10 @@ def get_most_unreadable():
     all_unreadable_file_set = get_all_unreadable_file()
 
     for file in all_unreadable_file_set:
+        #file = "modules/elasticsearch/src/main/java/org/elasticsearch/rest/action/search/RestSearchAction.java"
+        #file = "modules/elasticsearch/src/test/java/org/elasticsearch/transport/netty/SimpleNettyTransportTests.java"
+        #file ="src/main/java/org/elasticsearch/common/logging/log4j/LogConfigurator.java"
+        #file = "src/test/java/org/elasticsearch/index/mapper/binary/BinaryMappingTests.java"
 
         # otteniamo i valori del file analizzato
         file_details = get_file_timestamps_and_readable(str(file))
@@ -276,8 +282,9 @@ def get_most_unreadable():
         print(len(file_details['readability']))
         interval_files_dict[str(file)] = 0
         for index in range(len(file_details['readability'])):
+            print("- - - - index: " + str(index))
             if (file_details['readability'][index] == False) and (file_details['unsure'][index] == False):
-                print("Equals")
+                print("-> False / False")
                 print(index)
 
                 if index == (len(file_details['readability']) - 1):
@@ -307,7 +314,9 @@ def get_most_unreadable():
                     second_timestamp = file_details['timestamp'][index]
                     only_one = False
             elif (file_details['readability'][index] == False) and (file_details['unsure'][index] == True):
-                if file_details['unsure'][index - 1] == False and only_one == False:
+                print("-> False / True")
+                if file_details['unsure'][index - 1] == False and only_one == False and index != 0 and first_timestamp != 0:
+                    print("Meno -1 " + str(file_details['unsure'][index - 1]) )
                     # caso in cui siamo incerti e quindi bisogna prendere il precendente e calcoliamo
                     second_timestamp = file_details['timestamp'][index - 1]
                     interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
@@ -316,6 +325,7 @@ def get_most_unreadable():
                     second_timestamp = 0
                     print(interval_files_dict)
                 elif only_one == True:
+                    print("only one")
                     # caso solo un false ed unsure True
                     second_timestamp = file_details['timestamp'][index]
                     interval_files_dict[str(file)] += get_minutes_delta(first_timestamp=first_timestamp,
@@ -324,7 +334,7 @@ def get_most_unreadable():
                     first_timestamp = 0
                     second_timestamp = 0
             elif (file_details['readability'][index] == True) and (file_details['unsure'][index] == False):
-
+                print("-> True / False")
                 if only_one == True:
                     # Solo un false ed unreadable True
                     second_timestamp = file_details['timestamp'][index]
@@ -334,15 +344,20 @@ def get_most_unreadable():
                     first_timestamp = 0
                     second_timestamp = 0
             print("T1: " + str(first_timestamp) + "\n" + "T2: " + str(second_timestamp))
-        break
+        #break
 
     for index in data_file_list:
         print(index)
     # for file_delta in interval_files_dict:
     # print(interval_files_dict)
     sorted_files_deltaTime = sorted(interval_files_dict.items(), key=itemgetter(1), reverse=True)
-    for time in sorted_files_deltaTime:
-        print(time[1])
+
+    with open("output.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        for time in sorted_files_deltaTime:
+            #print(time[1])
+            #file.write(str(time) + "\n")
+            writer.writerow([time[0], time[1]])
 
 
 def get_Commit_Author(commit_id):
