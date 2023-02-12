@@ -15,6 +15,7 @@ venv/
 *.json
 *.swp
 **/test.py
+*.csv
 
 # Excluded files
 !requirements.txt
