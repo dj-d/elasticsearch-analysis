@@ -157,6 +157,16 @@ To perform the tests, you must proceed using the following instructions:
 - Now you can run the analysis.
 
     ```bash
+    # Create virtual environment if it does not exist
+    python3 -m venv venv
+
+    # Activate virtual environment if it does not already enable
+    source venv/bin/activate
+
+    # Install dependencies if they are not already installed
+    pip install -r requirements.txt
+
+    # Run analysis
     python database_connection.py
     ```
 
