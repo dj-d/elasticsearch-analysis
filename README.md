@@ -7,6 +7,7 @@
     - [Requirements](#requirements)
     - [How to create the dataset](#how-to-create-the-dataset)
     - [How to run the analysis](#how-to-run-the-analysis)
+  - [Results](#results)
   - [References](#references)
 
 ## Introduction
@@ -177,6 +178,35 @@ To perform the tests, you must proceed using the following instructions:
 **Note:* in the results regarding the analysis of illegible classes, time is expressed as minutes*
 
 ---
+
+## Results
+
+From the analysis we can say:
+
+- The 5 classes that remained not readable for the longest time are:
+
+    | Position | Class name                                                         | Time (years) |
+    | -------- | ------------------------------------------------------------------ | ------------ |
+    | 1        | `SortParseElement.java, FetchPhase.java`                           | ~3.481       |
+    | 2        | `FsAppendBenchmark.java`                                           | ~3.472       |
+    | 3        | `RiverModule.java, RestMainAction.java, ChildSearchBenchMark.java` | ~3.470       |
+    | 4        | `RestActionModule.java, XContentHelper.java`                       | ~3.464       |
+    | 5        | `ScriptFieldsParseElement.java`                                    | ~3.434       |
+
+- The 10 authors who introduced the most not readable classes are:
+
+    | Position | Author name              | Number of unreadable classes |
+    | -------- | ------------------------ | ---------------------------- |
+    | 1        | `Simon Willnauer`        | 737                          |
+    | 2        | `Shay Banon`             | 453                          |
+    | 3        | `kimchy`                 | 404                          |
+    | 4        | `uboness`                | 277                          |
+    | 5        | `Ryan Ernst`             | 266                          |
+    | 6        | `Robert Muir`            | 97                           |
+    | 7        | `Mirjn van Groningen`    | 92                           |
+    | 8        | `Adrien Grand`           | 76                           |
+    | 9        | `Colin Goodheart-Smithe` | 74                           |
+    | 10       | `Michael McCandless`     | 36                           |
 
 ## References
 
