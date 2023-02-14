@@ -162,6 +162,12 @@ To perform the tests, you must proceed using the following instructions:
 
 - Once the script has completed its execution, within the root directory of this project, there will be two .csv files with the results of the analysis.
 
+---
+
+**Note:* in the results regarding the analysis of illegible classes, time is expressed as minutes*
+
+---
+
 ## References
 
 - [Git - git-log Documentation](https://git-scm.com/docs/pretty-formats)
